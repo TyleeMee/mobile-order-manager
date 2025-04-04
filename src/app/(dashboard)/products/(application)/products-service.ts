@@ -154,6 +154,8 @@ export const removeProduct = async (
     // 製品の並び順情報からも削除する
     await deleteIdFromProductSequence(uid, categoryId, product.id);
 
+    //? 本来は以下の商品画像削除をこのProductServiceで実行したかったが、
+    //? サーバーサイドからだと上手くいかなかったので、deleteProductDialogで実行
     //Firebase Storage から画像を削除
     // try {
     //   await storage.bucket().file(product.imagePath).delete();
