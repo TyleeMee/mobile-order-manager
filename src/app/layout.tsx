@@ -1,15 +1,17 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { HomeIcon } from "lucide-react";
+import type { Metadata } from "next";
+import { Noto_Sans_JP } from "next/font/google";
+import Link from "next/link";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+import AuthButtons from "@/components/auth-buttons";
+import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/context/auth-context";
+
+const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -24,10 +26,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${notoSansJP.className} antialiased`}>
+        <AuthProvider>
+          <nav className="bg-sky-950 text-white p-5 h-24 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
+            <Link
+              href="/"
+              className="text-3xl tracking-widest flex gap-2 items-center uppercase"
+            >
+              <HomeIcon />
+              <span>Fire Homes</span>
+            </Link>
+            <ul className="flex gap-6 items-center">
+              {/* <li>
+                <Link
+                  href="products"
+                  className="tracking-widest hover:underline"
+                >
+                  Products List
+                </Link>
+              </li> */}
+              <li>
+                <AuthButtons />
+              </li>
+            </ul>
+          </nav>
+          {/* ヘッダーの高さ分のパディングを追加 dashboardのlayout.tsxと重ならないようにする*/}
+          <div className="pt-24">{children}</div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
