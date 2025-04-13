@@ -1,9 +1,9 @@
 "use server";
 
-import { formatFirestoreData } from "@/lib/firebase/utils";
+import { toCategory } from "@/lib/firebase/firestore-converters";
 
 import { firestore } from "../../../../../firebase/server";
-import { Category, CategoryData } from "../(domain)/category";
+import { CategoryData } from "../(domain)/category";
 
 // =====作成メソッド=====
 export const addCategory = async (
@@ -39,12 +39,7 @@ export const fetchCategories = async (uid: string) => {
       return [];
     }
 
-    return snapshot.docs.map((doc) =>
-      formatFirestoreData<Category>({
-        id: doc.id,
-        ...doc.data(),
-      })
-    );
+    return snapshot.docs.map((doc) => toCategory(doc.id, doc.data()));
   } catch (error) {
     console.error("カテゴリの取得に失敗しました:", error);
     throw new Error("カテゴリの取得に失敗しました");
@@ -63,10 +58,7 @@ export const fetchCategoryById = async (uid: string, categoryId: string) => {
       throw new Error("指定されたカテゴリが見つかりません");
     }
 
-    return formatFirestoreData<Category>({
-      id: categoryDoc.id,
-      ...categoryDoc.data(),
-    });
+    return toCategory(categoryDoc.id, categoryDoc.data() || {});
   } catch (error) {
     console.error(`カテゴリID: ${categoryId} の取得に失敗しました:`, error);
     throw new Error("カテゴリの取得に失敗しました");

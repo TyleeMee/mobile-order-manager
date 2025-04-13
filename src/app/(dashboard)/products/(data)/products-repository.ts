@@ -1,6 +1,6 @@
 "use server";
 
-import { formatFirestoreData } from "@/lib/firebase/utils";
+import { toProduct } from "@/lib/firebase/firestore-converters";
 
 import { firestore } from "../../../../../firebase/server";
 import { Product, ProductData } from "../(domain)/product";
@@ -38,12 +38,7 @@ export const fetchProducts = async (uid: string) => {
       return [];
     }
 
-    return snapshot.docs.map((doc) =>
-      formatFirestoreData<Product>({
-        id: doc.id,
-        ...doc.data(),
-      })
-    );
+    return snapshot.docs.map((doc) => toProduct(doc.id, doc.data()));
   } catch (error) {
     console.error("商品の取得に失敗しました:", error);
     throw new Error("商品の取得に失敗しました");
@@ -67,12 +62,7 @@ export const fetchProductsInCategory = async (
       return [];
     }
 
-    return snapshot.docs.map((doc) =>
-      formatFirestoreData<Product>({
-        id: doc.id,
-        ...doc.data(),
-      })
-    );
+    return snapshot.docs.map((doc) => toProduct(doc.id, doc.data()));
   } catch (error) {
     console.error(
       `カテゴリID: ${categoryId} 内の商品取得に失敗しました:`,
@@ -97,10 +87,29 @@ export const fetchProductById = async (
       return null;
     }
 
-    return formatFirestoreData<Product>({
-      id: docSnapshot.id,
-      ...docSnapshot.data(),
-    });
+    return toProduct(docSnapshot.id, docSnapshot.data() || {});
+  } catch (error) {
+    console.error(`商品ID: ${productId} の取得に失敗しました:`, error);
+    throw new Error("商品の取得に失敗しました");
+  }
+};
+
+// 商品ID指定で取得
+export const fetchProductTitleById = async (
+  uid: string,
+  productId: string
+): Promise<string | null> => {
+  try {
+    const userRef = firestore.collection("owners").doc(uid);
+    const productRef = userRef.collection("products").doc(productId);
+
+    const docSnapshot = await productRef.get();
+
+    if (!docSnapshot.exists) {
+      return null;
+    }
+
+    return toProduct(docSnapshot.id, docSnapshot.data() || {}).title;
   } catch (error) {
     console.error(`商品ID: ${productId} の取得に失敗しました:`, error);
     throw new Error("商品の取得に失敗しました");

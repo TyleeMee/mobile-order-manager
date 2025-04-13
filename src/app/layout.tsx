@@ -1,6 +1,5 @@
 import "./globals.css";
 
-import { HomeIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import Link from "next/link";
@@ -28,13 +27,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${notoSansJP.className} antialiased`}>
         <AuthProvider>
-          <nav className="bg-sky-950 text-white p-5 h-24 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
+          <nav className="bg-primary text-white p-5 h-24 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
             <Link
               href="/"
               className="text-3xl tracking-widest flex gap-2 items-center uppercase"
             >
-              <HomeIcon />
-              <span>Fire Homes</span>
+              <span>MOBILE ORDER MANAGER</span>
             </Link>
             <ul className="flex gap-6 items-center">
               {/* <li>

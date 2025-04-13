@@ -1,4 +1,9 @@
 {
+  "editor.fontSize": 14, // コードエディタのフォントサイズ（お好みのサイズに設定）
+  "window.zoomLevel": -0.5, // 全体のズームレベルは-0.5に設定
+  "workbench.tree.renderIndentGuides": "always", // インデントガイドを表示
+  "terminal.integrated.fontSize": 15,
+  "debug.console.fontSize": 18,
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#ab307e",
     "activityBar.background": "#ab307e",

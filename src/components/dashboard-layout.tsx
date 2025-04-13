@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  HelpCircle,
-  Package,
-  Settings,
-  Store,
-  Users,
-  Utensils,
-} from "lucide-react";
+import { History, Store, Users, Utensils } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -35,24 +28,14 @@ const navItems: NavItem[] = [
     icon: Store,
   },
   {
-    title: "ユーザー",
-    href: "/dashboard/users",
+    title: "新規オーダー",
+    href: "/orders/new",
     icon: Users,
   },
   {
-    title: "注文",
-    href: "/dashboard/orders",
-    icon: Package,
-  },
-  {
-    title: "設定",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
-  {
-    title: "ヘルプ",
-    href: "/dashboard/help",
-    icon: HelpCircle,
+    title: "注文履歴",
+    href: "/orders/past",
+    icon: History,
   },
 ];
 
@@ -64,7 +47,7 @@ const MobileNav: React.FC = () => {
   const mobileNavItems = navItems.slice(0, 5);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background z-50 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background z-50 lg:hidden">
       <div className="flex items-center justify-around h-16">
         {mobileNavItems.map((item) => {
           const isActive = pathname === item.href;
@@ -93,7 +76,7 @@ const Sidebar: React.FC = () => {
 
   // ヘッダーの高さに合わせてトップマージンを追加（ヘッダーの高さが96px = 24px * 4）
   return (
-    <div className="hidden md:flex h-screen w-64 flex-col fixed left-0 top-24 border-r">
+    <div className="hidden lg:flex h-screen w-64 flex-col fixed left-0 top-24 border-r">
       {/* <div className="p-6">
         <div className="font-bold text-md">管理パネル</div>
       </div> */}
@@ -138,7 +121,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <MobileNav />
 
       {/* メインコンテンツ */}
-      <main className="md:pl-64 pb-16 md:pb-0">
+      <main className="lg:pl-64 pb-16 lg:pb-0">
         <div className="py-6 px-2 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>

@@ -1,6 +1,6 @@
 "use server";
 
-import { formatFirestoreData } from "@/lib/firebase/utils";
+import { toShop } from "@/lib/firebase/firestore-converters";
 
 import { firestore } from "../../../../../firebase/server";
 import { Shop, ShopData } from "../(domain)/shop";
@@ -50,10 +50,7 @@ export const fetchShop = async (uid: string): Promise<Shop | null> => {
       return null;
     }
 
-    return formatFirestoreData<Shop>({
-      id: docSnapshot.id,
-      ...docSnapshot.data(),
-    });
+    return toShop(docSnapshot.id, docSnapshot.data() || {});
   } catch (error) {
     console.error("店舗情報の取得に失敗しました:", error);
     throw new Error("店舗情報の取得に失敗しました");
