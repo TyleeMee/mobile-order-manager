@@ -31,7 +31,7 @@ const currentApps = getApps();
 if (!currentApps.length) {
   const app = initializeApp({
     credential: cert(serviceAccount as ServiceAccount),
-    storageBucket: "mobile-order-manager-68e65.firebasestorage.app",
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   });
   firestore = getFirestore(app);
   storage = getStorage(app);
