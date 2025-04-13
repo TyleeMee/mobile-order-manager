@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import CreateProductForm from "../create-product-form";
 
-export default async function CreateProduct({
-  params,
-}: {
-  params: { categoryId: string };
-}) {
-  const { categoryId } = await params;
+type Props = {
+  params: {
+    categoryId: string;
+  };
+};
+
+export default async function CreateProduct({ params }: Props) {
+  const categoryId = params.categoryId;
 
   return (
     <div>
