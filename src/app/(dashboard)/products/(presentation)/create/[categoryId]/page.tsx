@@ -1,17 +1,12 @@
+import { Params } from "next/dist/server/request/params";
 import React from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import CreateProductForm from "../create-product-form";
 
-type Props = {
-  params: {
-    categoryId: string;
-  };
-};
-
-export default async function CreateProduct({ params }: Props) {
-  const categoryId = params.categoryId;
+export default function Page({ params }: { params: Params }) {
+  const categoryId = params.categoryId as string;
 
   return (
     <div>
