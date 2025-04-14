@@ -79,7 +79,7 @@ export default function ProductsPage() {
 
       <div className="space-y-8 max-w-screen-lg mx-auto px-6">
         <div className="flex justify-between items-center mt-6">
-          <h1 className="text-2xl font-bold mt-6">メニュー</h1>
+          <h1 className="text-lg font-bold mt-6">メニュー</h1>
           <div className="flex flex-col space-y-2">
             {categories.length > 0 && (
               <>
