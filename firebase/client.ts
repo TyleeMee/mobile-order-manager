@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { Analytics, getAnalytics } from "firebase/analytics";
+// import { Analytics, getAnalytics, isSupported } from "firebase/analytics";
 import { getApps, initializeApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
 import { FirebaseStorage, getStorage } from "firebase/storage";
@@ -20,20 +20,47 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const currentApps = getApps();
-let auth: Auth;
-let storage: FirebaseStorage;
-let analytics: Analytics;
+// let auth: Auth;
+// let storage: FirebaseStorage;
+// let analytics: Analytics | null = null; // 初期値をnullに設定
 
-if (!currentApps.length) {
-  const app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  storage = getStorage(app);
-  analytics = getAnalytics(app);
-} else {
-  const app = currentApps[0];
-  auth = getAuth(app);
-  storage = getStorage(app);
-  analytics = getAnalytics(app);
-}
+// Firebase アプリのインスタンスを取得（または新規作成）
+const app = currentApps.length ? currentApps[0] : initializeApp(firebaseConfig);
 
-export { analytics, auth, storage };
+// 共通のサービス初期化
+const auth: Auth = getAuth(app);
+const storage: FirebaseStorage = getStorage(app);
+
+//TODO Analyticsでエラーが発生するので、後ほど実装を考える。
+// クライアントサイドでのみAnalyticsを初期化
+// if (typeof window !== "undefined") {
+//   isSupported()
+//     .then((supported) => {
+//       if (supported) {
+//         analytics = getAnalytics(app);
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Analytics not supported:", error);
+//     });
+// }
+
+export {
+  //  analytics,
+  auth,
+  storage,
+};
+
+// if (!currentApps.length) {
+//   const app = initializeApp(firebaseConfig);
+//   auth = getAuth(app);
+//   storage = getStorage(app);
+//   analytics = getAnalytics(app);
+// } else {
+//   const app = currentApps[0];
+//   auth = getAuth(app);
+//   storage = getStorage(app);
+//   analytics = getAnalytics(app);
+// }
+
+// export { analytics, auth, storage };
