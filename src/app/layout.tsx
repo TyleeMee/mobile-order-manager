@@ -29,7 +29,7 @@ export default function RootLayout({
         <AuthProvider>
           <nav className="bg-primary text-white p-5 h-24 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
             <Link
-              href="/"
+              href="/login"
               className="text-3xl tracking-widest flex gap-2 items-center uppercase"
             >
               <span>MOBILE ORDER MANAGER</span>
