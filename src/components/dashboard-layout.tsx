@@ -121,9 +121,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <MobileNav />
 
       {/* メインコンテンツ */}
-      <main className="lg:pl-64 pb-16 lg:pb-0">
-        <div className="py-6 px-2 max-w-7xl mx-auto">{children}</div>
-      </main>
+      <main className="lg:pl-64 pb-16 lg:pb-0">{children}</main>
     </div>
   );
 };
