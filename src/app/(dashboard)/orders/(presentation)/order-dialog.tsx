@@ -97,11 +97,7 @@ export default function OrderDialog({
           </div>
 
           {/* 追加のフッター要素（アクションボタンなど） */}
-          {/* {children &&  */}
-          <DialogFooter className="mt-4">
-            {children || <span>アクションはありません</span>}{" "}
-          </DialogFooter>
-          {/* } */}
+          {children && <DialogFooter className="mt-4">{children}</DialogFooter>}
         </DialogContent>
       </Dialog>
     </>

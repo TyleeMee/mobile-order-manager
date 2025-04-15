@@ -39,6 +39,11 @@ export async function getNewOrders(
     // 新規オーダーを取得
     const orders = await fetchNewOrders(uid);
 
+    // 日付で昇順にソート（古い順）
+    orders.sort((a, b) => {
+      return a.orderDate.getTime() - b.orderDate.getTime();
+    });
+
     // 製品タイトル情報を付加
     return await enrichOrdersWithProductTitles(uid, orders);
   } catch (error) {
@@ -54,6 +59,11 @@ export async function getPastOrders(
   try {
     // 過去オーダーを取得
     const orders = await fetchPastOrders(uid);
+
+    // 日付で降順にソート（新しい順）
+    orders.sort((a, b) => {
+      return b.orderDate.getTime() - a.orderDate.getTime();
+    });
 
     // 製品タイトル情報を付加
     return await enrichOrdersWithProductTitles(uid, orders);

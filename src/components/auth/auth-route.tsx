@@ -18,7 +18,11 @@ export function AuthRoute({ children }: { children: React.ReactNode }) {
 
   // 認証状態の確認中はローディング
   if (!auth || auth.loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-160px)]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   // 認証されていない場合のみログインページを表示

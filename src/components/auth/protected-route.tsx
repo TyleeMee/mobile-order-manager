@@ -20,8 +20,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   // ローディング中、リダイレクト中、またはauthが未初期化の場合はローディング表示
   if (!auth || auth.loading || isRedirecting) {
-    //TODO 必要であればインジケーターやスケルトン　スクリーンなどに変更
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-160px)]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   // 認証済みの場合は子コンポーネントを表示

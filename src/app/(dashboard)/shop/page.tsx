@@ -68,7 +68,11 @@ export default function ShopPage() {
 
   // ローディング中の表示
   if (shopState.status === "loading") {
-    return <div>読み込み中...</div>;
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-96px)]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   // エラー時の表示

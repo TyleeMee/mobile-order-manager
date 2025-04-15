@@ -12,7 +12,7 @@ export const passwordValidation = z.string().refine(
 
 export const registerUserSchema = z
   .object({
-    email: z.string().email(),
+    email: z.string().email("メールアドレスの形式が正しくありません"),
     name: z.string().min(1, "名前を入力してください"),
     password: passwordValidation,
     passwordConfirm: z.string(),
@@ -28,6 +28,6 @@ export const registerUserSchema = z
   });
 
 export const loginUserSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email("メールアドレスの形式が正しくありません"),
   password: passwordValidation,
 });

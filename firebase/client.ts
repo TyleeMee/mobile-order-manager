@@ -31,26 +31,13 @@ const app = currentApps.length ? currentApps[0] : initializeApp(firebaseConfig);
 const auth: Auth = getAuth(app);
 const storage: FirebaseStorage = getStorage(app);
 
-//TODO Analyticsでエラーが発生するので、後ほど実装を考える。
-// クライアントサイドでのみAnalyticsを初期化
-// if (typeof window !== "undefined") {
-//   isSupported()
-//     .then((supported) => {
-//       if (supported) {
-//         analytics = getAnalytics(app);
-//       }
-//     })
-//     .catch((error) => {
-//       console.error("Analytics not supported:", error);
-//     });
-// }
-
 export {
   //  analytics,
   auth,
   storage,
 };
 
+//TODO Analyticsでエラーが発生するので、後ほど実装を考える。
 // if (!currentApps.length) {
 //   const app = initializeApp(firebaseConfig);
 //   auth = getAuth(app);

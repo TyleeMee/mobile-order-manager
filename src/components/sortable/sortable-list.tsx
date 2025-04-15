@@ -11,7 +11,6 @@ type SortableListProps<T extends SortableItem> = {
   type: string;
   onDragEnd: (result: DropResult) => void;
   renderItem: (item: T) => ReactNode;
-  loadingMessage?: string;
   isLoading?: boolean;
 };
 
@@ -22,11 +21,14 @@ export default function SortableList<T extends SortableItem>({
   type,
   onDragEnd,
   renderItem,
-  loadingMessage = "読み込み中...",
   isLoading = false,
 }: SortableListProps<T>) {
   if (isLoading && items.length > 0) {
-    return <div>{loadingMessage}</div>;
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-160px)]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   return (

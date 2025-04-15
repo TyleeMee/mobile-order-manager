@@ -10,7 +10,9 @@ import { AuthProvider } from "@/context/auth-context";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "700"], // 一般的なweightだけに制限
+  display: "swap",
+  preload: false, // プリロードを無効化
 });
 
 export const metadata: Metadata = {

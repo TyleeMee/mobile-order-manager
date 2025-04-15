@@ -81,19 +81,37 @@ export default function OrdersTablePage({
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-96px)]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-96px)]">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-96px)]">
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <p>読み込み中...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : orders.length === 0 ? (
-          <p>{emptyMessage}</p>
-        ) : (
+        {
           <>
             <Table>
               <TableHeader>
@@ -138,7 +156,7 @@ export default function OrdersTablePage({
                 />
               ))}
           </>
-        )}
+        }
       </CardContent>
     </Card>
   );
