@@ -37,14 +37,6 @@ export default function RootLayout({
               <span>MOBILE ORDER MANAGER</span>
             </Link>
             <ul className="flex gap-6 items-center">
-              {/* <li>
-                <Link
-                  href="products"
-                  className="tracking-widest hover:underline"
-                >
-                  Products List
-                </Link>
-              </li> */}
               <li>
                 <AuthButtons />
               </li>
