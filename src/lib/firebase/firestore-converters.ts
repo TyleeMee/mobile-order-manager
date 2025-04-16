@@ -16,16 +16,16 @@ export function formatFirestoreData<T extends Record<string, unknown>>(
 
 import { DocumentData, Timestamp } from "firebase/firestore";
 
-import { Category } from "@/app/(dashboard)/categories/(domain)/category";
+import { Category } from "@/app/(app-content)/(dashboard)/categories/(domain)/category";
 import {
   Order,
   orderStatusFromString,
-} from "@/app/(dashboard)/orders/(domain)/order";
+} from "@/app/(app-content)/(dashboard)/orders/(domain)/order";
 import {
   Product,
   ProductID,
-} from "@/app/(dashboard)/products/(domain)/product";
-import { Shop } from "@/app/(dashboard)/shop/(domain)/shop";
+} from "@/app/(app-content)/(dashboard)/products/(domain)/product";
+import { Shop } from "@/app/(app-content)/(dashboard)/shop/(domain)/shop";
 
 // タイムスタンプライクなオブジェクトの型定義
 interface TimestampLike {

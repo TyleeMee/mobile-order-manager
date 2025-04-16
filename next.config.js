@@ -17,15 +17,15 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   // リダイレクト設定を追加
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/login",
-        permanent: true, // 301リダイレクト。一時的なリダイレクトなら false
-      },
-    ];
-  },
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: "/",
+  //       destination: "/login",
+  //       permanent: true, // 301リダイレクト。一時的なリダイレクトなら false
+  //     },
+  //   ];
+  // },
 };
 
 module.exports = nextConfig;

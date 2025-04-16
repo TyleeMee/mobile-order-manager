@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getNewOrders } from "@/app/(dashboard)/orders/(application)/orders-service";
+import { getNewOrders } from "@/app/(app-content)/(dashboard)/orders/(application)/orders-service";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { createOwner } from "@/app/(auth)/(application)/auth-service";
+import { createOwner } from "@/app/(app-content)/(auth)/(application)/auth-service";
 import { useAuth } from "@/context/auth-context";
 
 import { Button } from "./ui/button";
