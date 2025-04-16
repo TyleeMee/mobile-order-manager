@@ -1,17 +1,29 @@
-// import Image from "next/image";
+import Image from "next/image";
+import Link from "next/link";
 
-import { EyeIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getImagesFromFolder } from "@/lib/firebase/firebase-storage";
 
-export default function Home() {
+// 静的ページ生成のためのデータフェッチ
+async function getHomeImage() {
+  // 'home/' はFirebase Storage内のフォルダパス
+  const imageData = await getImagesFromFolder("home/");
+  return imageData.length > 0 ? imageData[0] : null;
+}
+
+//* App Routerはサーバーコンポーネントなので、コンポーネント関数内で直接asyncとawaitを使用できる
+export default async function Home() {
+  const homeImage = await getHomeImage();
+
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-96px)] px-4">
+    <div className="flex items-center justify-center min-h-[calc(100vh-96px)] px-4 py-8">
       <div className="max-w-screen-lg w-full">
         <div className="flex flex-col md:flex-row items-center justify-between w-full gap-8">
           {/* 左側の正方形 - 情報とボタン */}
-          <div className="flex flex-col justify-between w-full md:w-1/2 aspect-square bg-white p-6 rounded-lg shadow-md">
+          <div className="flex flex-col justify-between w-full md:w-1/2 aspect-square bg-white p-6 rounded-lg">
             <div className="flex flex-col h-full justify-between">
               {/* 1. 大きめの文字でタイトル */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center md:text-left mb-4 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
                 テイクアウト用
                 <br />
                 モバイルオーダー
@@ -24,9 +36,12 @@ export default function Home() {
 
               {/* 3. ボタン */}
               <div>
-                <button className="w-full py-4 bg-blue-600 text-white text-xl font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300">
-                  無料で始める
-                </button>
+                <Button
+                  asChild
+                  className="w-full py-6 bg-blue-600 text-white text-xl font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
+                >
+                  <Link href="/register">無料で始める</Link>
+                </Button>
 
                 {/* 4. 注釈 */}
                 <p className="text-xs text-gray-500 mt-4">
@@ -36,9 +51,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 右側の正方形 - 画像表示 */}
-          <div className="w-full md:w-1/2 aspect-square bg-gray-100 rounded-lg overflow-hidden shadow-md">
-            <EyeIcon />
+          {/* 右側の正方形 - 画像表示（画像がない場合は白い背景のみ） */}
+          <div className="w-full md:w-1/2 aspect-square bg-white rounded-lg overflow-hidden relative">
+            {homeImage && homeImage.url && (
+              <Image
+                src={homeImage.url}
+                alt={homeImage.name || "ヒーロー画像"}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
+            )}
+            {/* 画像がない場合は何も表示しない（divの背景色が表示される） */}
           </div>
         </div>
       </div>

@@ -66,12 +66,12 @@ export default function AuthButtons() {
       )}
       {!auth?.currentUser && (
         <div className="flex gap-2 items-center">
-          <Link href="/login" className="tracking-widest hover:underline">
-            Login
+          <Link href="/register" className="tracking-widest hover:underline">
+            新規登録
           </Link>
           <div className="h-8 w-[1px] bg-white/50" />
-          <Link href="/register" className="tracking-widest hover:underline">
-            Signup
+          <Link href="/login" className="tracking-widest hover:underline">
+            ログイン
           </Link>
         </div>
       )}

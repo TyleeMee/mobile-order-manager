@@ -7,6 +7,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com", // Firebase Storage の画像
       },
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+      },
     ],
   },
   // 型チェックとESLintをスキップする設定
@@ -16,16 +20,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // リダイレクト設定を追加
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: "/",
-  //       destination: "/login",
-  //       permanent: true, // 301リダイレクト。一時的なリダイレクトなら false
-  //     },
-  //   ];
-  // },
 };
 
 module.exports = nextConfig;

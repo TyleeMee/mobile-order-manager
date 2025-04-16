@@ -13,7 +13,7 @@ export default function AppContentLayout({
     <AuthProvider>
       <nav className="bg-primary text-white p-5 h-24 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
         <Link
-          href="/login"
+          href="/"
           className="text-2xl tracking-widest flex gap-2 items-center uppercase"
         >
           <span>MOBILE ORDER MANAGER</span>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+
 export default function AppContentLayout({
   children,
 }: Readonly<{
@@ -14,17 +16,22 @@ export default function AppContentLayout({
         >
           <span>MOBILE ORDER MANAGER</span>
         </Link>
-        <ul className="flex gap-6 items-center">
-          <li>
-            <Link href="/login" className="tracking-widest hover:underline">
-              Login
-            </Link>
-            <div className="h-8 w-[1px] bg-white/50" />
-            <Link href="/register" className="tracking-widest hover:underline">
-              Signup
-            </Link>
-          </li>
-        </ul>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="default"
+            asChild
+            className="bg-white text-black hover:bg-gray-100"
+          >
+            <Link href="/register">無料で始める</Link>
+          </Button>
+          <div className="h-8 w-[1px] bg-white/50" />
+          <Link
+            href="/login"
+            className="tracking-widest hover:underline whitespace-nowrap"
+          >
+            ログイン
+          </Link>
+        </div>
       </nav>
       {/* ヘッダーの高さ分のパディングを追加 以下のコンテンツと重ならないようにする*/}
       <div className="pt-24">{children}</div>
