@@ -7,6 +7,7 @@ import { getImagesFromFolder } from "@/lib/firebase/firebase-storage";
 // 静的ページ生成のためのデータフェッチ
 async function getHomeImage() {
   // 'home/' はFirebase Storage内のフォルダパス
+  //TODO (注意)クライアントサイドでの画像取得ロジック
   const imageData = await getImagesFromFolder("home/");
   return imageData.length > 0 ? imageData[0] : null;
 }
@@ -19,22 +20,18 @@ export default async function Home() {
     <div className="flex items-center justify-center min-h-[calc(100vh-96px)] px-4 py-8">
       <div className="max-w-screen-lg w-full">
         <div className="flex flex-col md:flex-row items-center justify-between w-full gap-8">
-          {/* 左側の正方形 - 情報とボタン */}
           <div className="flex flex-col justify-between w-full md:w-1/2 aspect-square bg-white p-6 rounded-lg">
             <div className="flex flex-col h-full justify-between">
-              {/* 1. 大きめの文字でタイトル */}
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
                 テイクアウト用
                 <br />
                 モバイルオーダー
               </h1>
 
-              {/* 2. 小さめの文字で説明 */}
               <p className="text-lg text-gray-700 mb-8 md:mb-16">
                 <strong>Webやスマホから簡単にお持ち帰りの注文を受け付け</strong>
               </p>
 
-              {/* 3. ボタン */}
               <div>
                 <Button
                   asChild
@@ -43,7 +40,6 @@ export default async function Home() {
                   <Link href="/register">無料で始める</Link>
                 </Button>
 
-                {/* 4. 注釈 */}
                 <p className="text-xs text-gray-500 mt-4">
                   ※注文ごとに販売手数料が発生します。
                 </p>
@@ -51,7 +47,7 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* 右側の正方形 - 画像表示（画像がない場合は白い背景のみ） */}
+          {/* 画像表示（画像がない場合は白い背景のみ） */}
           <div className="w-full md:w-1/2 aspect-square bg-white rounded-lg overflow-hidden relative">
             {homeImage && homeImage.url && (
               <Image

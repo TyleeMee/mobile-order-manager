@@ -116,7 +116,7 @@ export const editProduct = async (
   productId: string,
   productData: Partial<ProductData>
 ): Promise<ProductResult> => {
-  // バリデーションチェック（部分更新の場合はpartialなスキーマを使用する必要があるかもしれません）
+  // バリデーションチェック（部分更新の場合はpartialなスキーマを使用する必要があるかも）
   const validation = productSchema.partial().safeParse(productData);
   if (!validation.success) {
     return {
@@ -155,7 +155,7 @@ export const removeProduct = async (
     await deleteIdFromProductSequence(uid, categoryId, product.id);
 
     //? 本来は以下の商品画像削除をこのProductServiceで実行したかったが、
-    //? サーバーサイドからだと上手くいかなかったので、deleteProductDialogで実行
+    //? サーバーサイドからだと上手くいかなかったので、DeleteProductDialogで実行
     //Firebase Storage から画像を削除
     // try {
     //   await storage.bucket().file(product.imagePath).delete();

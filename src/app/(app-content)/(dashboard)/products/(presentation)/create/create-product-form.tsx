@@ -48,7 +48,7 @@ export default function CreateProductForm({ categoryId }: Props) {
   return (
     <div>
       <ProductForm
-        handleSubmit={handleSubmit}
+        handleSubmitAction={handleSubmit}
         submitButtonLabel={
           <>
             <PlusCircleIcon />

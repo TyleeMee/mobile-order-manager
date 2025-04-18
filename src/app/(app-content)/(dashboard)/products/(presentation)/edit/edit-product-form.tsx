@@ -90,7 +90,7 @@ export default function EditProductForm({ productId }: Props) {
   return (
     <div>
       <ProductForm
-        handleSubmit={handleSubmit}
+        handleSubmitAction={handleSubmit}
         submitButtonLabel={
           <>
             <PlusCircleIcon />

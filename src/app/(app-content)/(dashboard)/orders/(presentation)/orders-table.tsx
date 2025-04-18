@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,7 +19,7 @@ import PastOrderDialog from "./past/past-order-dialog";
 
 type OrdersTableProps = {
   title: string;
-  apiEndpoint: string;
+  apiEndpoint: string; //*APIエンドポイントからデータを取得するため
   loadingErrorMessage: string;
   emptyMessage: string;
   isNewOrderTable?: boolean;
@@ -41,9 +41,13 @@ export default function OrdersTablePage({
     useState<OrderWithProductTitles | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const loadOrders = async () => {
+  //* 関数のメモ化
+  //* 依存配列の値が変わらない限り、再レンダリング間で同じ関数参照を保持。以下の循環を防ぐ
+  //* コンポーネントのレンダリング → 新しい loadOrders 関数の作成 → useEffect の実行 → 状態更新 → 再レンダリング
+  const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
+      //? const orders = await getNewOrders(uid);でデータを直接するとエラー発生
       // APIを呼び出してデータを取得
       const response = await fetch(`${apiEndpoint}?uid=${uid}`);
 
@@ -60,11 +64,11 @@ export default function OrdersTablePage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [uid, apiEndpoint, loadingErrorMessage]);
 
   useEffect(() => {
     loadOrders();
-  }, [uid, apiEndpoint, loadingErrorMessage]);
+  }, [loadOrders]);
 
   // 注文ステータス変更後のリロード
   const handleStatusChange = () => {

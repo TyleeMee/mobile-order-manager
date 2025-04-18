@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { getFirebaseErrorInfo } from "@/lib/error-messages/firebse-client-errors";
+import { getFirebaseErrorInfo } from "@/lib/error-messages/firebase-client-errors";
 import { loginUserSchema } from "@/validation/auth-user-schema";
 
 export default function LoginForm() {
@@ -89,13 +89,6 @@ export default function LoginForm() {
             }}
           />
           <Button type="submit">ログイン</Button>
-          {/* //TODO パスワードの再設定 */}
-          {/* <div>
-            パスワードをお忘れの方
-            <Link href="/forgot-password" className="pl-2 underline">
-              Reset it here.
-            </Link>
-          </div> */}
           <div className="text-center pb-5">or</div>
         </fieldset>
       </form>

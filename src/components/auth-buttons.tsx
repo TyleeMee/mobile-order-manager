@@ -31,19 +31,6 @@ export default function AuthButtons() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* <DropdownMenuItem asChild>
-              <Link href="/account">My Account</Link>
-            </DropdownMenuItem> */}
-            {/* {!!auth.customClaims?.admin && (
-              <DropdownMenuItem asChild>
-                <Link href="/admin-dashboard">Admin Dashboard</Link>
-              </DropdownMenuItem>
-            )}
-            {!auth.customClaims?.admin && (
-              <DropdownMenuItem asChild>
-                <Link href="/account/my-favorites">My Favorites</Link>
-              </DropdownMenuItem>
-            )} */}
             <DropdownMenuItem
               onClick={async () => {
                 await auth.logout();
@@ -53,16 +40,6 @@ export default function AuthButtons() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        // <>
-        //   <div>{auth.currentUser.email}</div>
-        //   <div
-        //     onClick={() => {
-        //       auth.logout();
-        //     }}
-        //   >
-        //     Logout
-        //   </div>
-        // </>
       )}
       {!auth?.currentUser && (
         <div className="flex gap-2 items-center">

@@ -31,12 +31,12 @@ import { ProductFormValues } from "../(domain)/product";
 
 type Props = {
   submitButtonLabel: React.ReactNode;
-  handleSubmit: (data: z.infer<typeof productSchema>) => void;
+  handleSubmitAction: (data: z.infer<typeof productSchema>) => void;
   defaultValues?: Partial<ProductFormValues>;
 };
 
 export default function ProductForm({
-  handleSubmit,
+  handleSubmitAction,
   submitButtonLabel,
   defaultValues,
 }: Props) {
@@ -67,6 +67,7 @@ export default function ProductForm({
 
   const onSubmit = async (_data: z.infer<typeof productSchema>) => {
     try {
+      //TODO (注意)クライアントサイドでの画像登録・削除のロジック
       // 新しい画像ファイルがある場合は処理
       if (imageFile) {
         setIsUploading(true);
@@ -129,7 +130,7 @@ export default function ProductForm({
         throw new Error("画像のアップロードが完了していません");
       }
 
-      await handleSubmit(updatedData);
+      await handleSubmitAction(updatedData);
     } catch (error) {
       console.error("画像アップロードエラー:", error);
 

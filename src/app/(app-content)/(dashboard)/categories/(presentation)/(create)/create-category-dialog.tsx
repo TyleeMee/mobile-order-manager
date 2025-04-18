@@ -30,13 +30,8 @@ export default function CreateCategoryDialog() {
       return;
     }
 
-    // toast({
-    //   title: "商品カテゴリーを追加しました",
-    //   // description: "商品を追加しました",
-    //   variant: "success",
-    // });
-
     // router.pushではなく、完全にページをリロード
+    //? streamでcategoriesDataを取得しないと自動で更新されない
     window.location.href = "/products";
 
     console.log({ response });
@@ -44,7 +39,7 @@ export default function CreateCategoryDialog() {
   return (
     <div>
       <CategoryDialog
-        handleSubmit={handleSubmit}
+        handleSubmitAction={handleSubmit}
         triggerButton={
           <Button className="inline-flex gap-2 mt-4">
             <PlusCircleIcon /> 商品カテゴリーを追加

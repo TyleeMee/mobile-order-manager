@@ -1,4 +1,3 @@
-// page.tsx に追加
 export const dynamic = "force-static";
 
 import Link from "next/link";

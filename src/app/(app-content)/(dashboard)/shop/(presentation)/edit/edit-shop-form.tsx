@@ -55,7 +55,7 @@ export default function EditShopForm({ shop }: Props) {
   return (
     <div>
       <ShopForm
-        handleSubmit={handleSubmit}
+        handleSubmitAction={handleSubmit}
         submitButtonLabel={
           <>
             <PlusCircleIcon />

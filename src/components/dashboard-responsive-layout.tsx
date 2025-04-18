@@ -77,9 +77,6 @@ const Sidebar: React.FC = () => {
   // ヘッダーの高さに合わせてトップマージンを追加（ヘッダーの高さが96px = 24px * 4）
   return (
     <div className="hidden lg:flex h-screen w-64 flex-col fixed left-0 top-24 border-r">
-      {/* <div className="p-6">
-        <div className="font-bold text-md">管理パネル</div>
-      </div> */}
       <ScrollArea className="flex-1">
         <div className="space-y-2 px-4 py-2 pt-6">
           {navItems.map((item) => (

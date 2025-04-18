@@ -187,36 +187,3 @@ export function toOrder(docId: string, docData: DocumentData): Order {
     total: Number(docData.total) || 0.0,
   };
 }
-
-//TODO 不要なコードを削除
-// export function toOrder(docId: string, docData: DocumentData): Order {
-//   // データ変換の安全性を確保
-//   if (!docData) {
-//     throw new Error("Document data is null or undefined");
-//   }
-
-//   try {
-//     // 必須フィールドの存在を確認し、デフォルト値を設定
-//     const orderStatus = docData.orderStatus
-//       ? orderStatusFromString(docData.orderStatus)
-//       : OrderStatus.NEW_ORDER;
-
-//     return {
-//       id: docId,
-//       pickupId: docData.pickupId || "",
-//       items: toItemsMap(docData.items),
-//       productIds: toProductIdsList(docData.productIds),
-//       orderStatus: orderStatus,
-//       orderDate: convertTimestamp(docData.orderDate),
-//       total: Number(docData.total) || 0.0,
-//     };
-//   } catch (error) {
-//     console.error(
-//       `Order conversion error for document ${docId}:`,
-//       error,
-//       docData
-//     );
-//     // エラーを再スローして、上位の関数でハンドリングできるようにする
-//     throw new Error(`Failed to convert order document ${docId}: ${error}`);
-//   }
-// }

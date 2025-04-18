@@ -38,12 +38,12 @@ import { ShopFormValues } from "../(domain)/shop";
 
 type Props = {
   submitButtonLabel: React.ReactNode;
-  handleSubmit: (data: z.infer<typeof shopSchema>) => void;
+  handleSubmitAction: (data: z.infer<typeof shopSchema>) => void;
   defaultValues?: Partial<ShopFormValues>;
 };
 
 export default function ShopForm({
-  handleSubmit,
+  handleSubmitAction,
   submitButtonLabel,
   defaultValues,
 }: Props) {
@@ -77,6 +77,7 @@ export default function ShopForm({
 
   const onSubmit = async (_data: z.infer<typeof shopSchema>) => {
     try {
+      //TODO (注意)クライアントサイドでの画像登録・削除のロジック
       // 新しい画像ファイルがある場合は処理
       if (imageFile) {
         setIsUploading(true);
@@ -133,7 +134,7 @@ export default function ShopForm({
         throw new Error("画像のアップロードが完了していません");
       }
 
-      await handleSubmit(updatedData);
+      await handleSubmitAction(updatedData);
     } catch (error) {
       console.error("画像アップロードエラー:", error);
 

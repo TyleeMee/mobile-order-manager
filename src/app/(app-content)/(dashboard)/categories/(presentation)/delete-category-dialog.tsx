@@ -47,6 +47,7 @@ export function DeleteCategoryDialog({ categoryId, categoryTitle }: Props) {
       setIsDeleting(false); // 処理完了後、削除中状態を解除
     }
     // router.pushではなく、完全にページをリロード
+    //? streamでcategoriesDataを取得しないと自動で更新されない
     // エラーが発生しなかった場合のみリダイレクト
     if (success) {
       window.location.href = "/products";

@@ -43,6 +43,7 @@ export function DeleteProductDialog({ categoryId, product }: Props) {
       setError(null); // エラーをリセット
       await removeProduct(user.uid, categoryId, product); // 実際の削除処理を実行
       //商品画像を削除
+      //TODO (注意)クライアントサイドでの画像削除のロジック
       try {
         const imageRef = ref(storage, product.imagePath);
         await deleteObject(imageRef);

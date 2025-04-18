@@ -152,7 +152,7 @@ export const removeCategory = async (
     // 2. 商品とその順序情報を削除（並行処理で効率化）
     if (products.length > 0) {
       const productDeletionPromises = products.map((product) =>
-        removeProduct(uid, product.id, categoryId)
+        removeProduct(uid, categoryId, product)
       );
       await Promise.all(productDeletionPromises);
     }

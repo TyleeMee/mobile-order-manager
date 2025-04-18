@@ -35,23 +35,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await auth.signOut();
   };
 
-  //TODO 以下のエラーを後ほど修正する250225
-  //   Console Error
-
-  // FirebaseError: Firebase: Error (auth/cancelled-popup-request).
-
-  // Source
-  // src/context/auth.tsx (59:42) @ Object.loginWithGoogle
-
-  //   57 |
-  //   58 |     try {
-  // > 59 |       const result = await signInWithPopup(auth, provider);
-  //      |                                          ^
-  //   60 |       console.log("User signed in:", result.user);
-  //   61 |       return result.user; // 関数の戻り値として適用される
-  //   62 |     } catch (error) {
-  // handleGoogleLogin
-  // src/components/continue-with-google-button.tsx (17:31)
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
 
@@ -95,22 +78,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // ログインフラグをリセット
       isLoggingIn = false;
     }
-
-    // await signInWithPopup(auth, provider)
-    //   .then((result) => {
-    //     console.log("User signed in:", result.user);
-    //     return result.user;
-    //   })
-    //   .catch((error) => {
-    //     if (error.code === "auth/popup-closed-by-user") {
-    //       console.log(
-    //         "The user closed the popup without completing the sign-in."
-    //       );
-    //     } else {
-    //       console.error("Authentication error:", error);
-    //     }
-    //     return null;
-    //   });
   };
 
   const loginWithEmail = async (email: string, password: string) => {

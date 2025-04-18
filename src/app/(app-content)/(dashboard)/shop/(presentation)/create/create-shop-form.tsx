@@ -44,7 +44,7 @@ export default function CreateShopForm() {
   return (
     <div>
       <ShopForm
-        handleSubmit={handleSubmit}
+        handleSubmitAction={handleSubmit}
         submitButtonLabel={
           <>
             <PlusCircleIcon />

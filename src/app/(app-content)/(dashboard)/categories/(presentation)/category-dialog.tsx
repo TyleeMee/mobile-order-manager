@@ -33,13 +33,13 @@ type ButtonElement = ReactElement<{
 }>;
 
 type Props = {
-  handleSubmit: (data: z.infer<typeof categorySchema>) => void;
+  handleSubmitAction: (data: z.infer<typeof categorySchema>) => void;
   triggerButton: ButtonElement;
   defaultValues?: Partial<CategoryData>;
 };
 
 export default function CategoryDialog({
-  handleSubmit,
+  handleSubmitAction,
   triggerButton,
   defaultValues,
 }: Props) {
@@ -62,7 +62,7 @@ export default function CategoryDialog({
     try {
       setIsSubmitting(true);
       // APIリクエストなどの非同期処理
-      await handleSubmit(data);
+      await handleSubmitAction(data);
       // 成功したらダイアログを閉じる
       setOpen(false);
       form.reset();

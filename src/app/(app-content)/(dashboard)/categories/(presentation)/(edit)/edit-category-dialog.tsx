@@ -35,13 +35,8 @@ export default function EditCategoryDialog({ category }: Props) {
       return;
     }
 
-    // toast({
-    //   title: "商品カテゴリーを追加しました",
-    //   // description: "商品を追加しました",
-    //   variant: "success",
-    // });
-
     // router.pushではなく、完全にページをリロード
+    //? streamでcategoriesDataを取得しないと自動で更新されない
     window.location.href = "/categories";
 
     console.log({ response });
@@ -50,7 +45,7 @@ export default function EditCategoryDialog({ category }: Props) {
   return (
     <div>
       <CategoryDialog
-        handleSubmit={handleSubmit}
+        handleSubmitAction={handleSubmit}
         triggerButton={
           <Button variant="outline" size="sm">
             <PencilIcon />

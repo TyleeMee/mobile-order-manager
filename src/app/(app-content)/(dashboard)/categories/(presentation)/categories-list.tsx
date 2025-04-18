@@ -13,8 +13,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuthenticatedUser } from "@/hooks/use-authenticated-user";
 
 import { getSortedCategories } from "../(application)/categories-service";
-import { Category } from "../(domain)/category";
 import { updateCategorySequence } from "../(data)/category-sequence-repository";
+import { Category } from "../(domain)/category";
 import EditCategoryDialog from "./(edit)/edit-category-dialog";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
 
