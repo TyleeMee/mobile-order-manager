@@ -3,7 +3,7 @@ import { UserRound } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/contexts/auth-context-firebase";
 
 import {
   DropdownMenu,

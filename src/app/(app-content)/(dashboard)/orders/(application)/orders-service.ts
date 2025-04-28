@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchProductTitleById } from "../../products/(data)/products-repository";
+import { fetchProductTitleById } from "../../products-firebase/(data)/products-repository";
 import {
   fetchNewOrders,
   fetchOrderById,

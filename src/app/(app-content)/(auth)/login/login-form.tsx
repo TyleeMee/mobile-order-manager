@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/contexts/auth-context-firebase";
 import { useToast } from "@/hooks/use-toast";
 import { getFirebaseErrorInfo } from "@/lib/error-messages/firebase-client-errors";
 import { loginUserSchema } from "@/validation/auth-user-schema";

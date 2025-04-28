@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+# backendフォルダのnode_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -39,3 +41,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Backend build outputs
+/backend/dist
+/backend/build
+
+# Local env files
+/backend/.env*
+
+# Logs
+/backend/logs
+*.log
+
+# Editor directories and files
+.idea
+*.swp
+*.swo

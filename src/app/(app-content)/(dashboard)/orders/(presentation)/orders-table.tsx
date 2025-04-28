@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user";
+import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 
 import { OrderWithProductTitles } from "../(domain)/order";
 import ClickableTableRow from "./clickable-table-row";

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user";
+import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 import { useToast } from "@/hooks/use-toast";
 
 import {

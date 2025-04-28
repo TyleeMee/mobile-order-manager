@@ -16,7 +16,7 @@ export function formatFirestoreData<T extends Record<string, unknown>>(
 
 import { DocumentData, Timestamp } from "firebase/firestore";
 
-import { Category } from "@/app/(app-content)/(dashboard)/categories/(domain)/category";
+import { Category } from "@/app/(app-content)/(dashboard)/categories-firebase/(domain)/category";
 import {
   Order,
   orderStatusFromString,
@@ -24,8 +24,8 @@ import {
 import {
   Product,
   ProductID,
-} from "@/app/(app-content)/(dashboard)/products/(domain)/product";
-import { Shop } from "@/app/(app-content)/(dashboard)/shop/(domain)/shop";
+} from "@/app/(app-content)/(dashboard)/products-firebase/(domain)/product";
+import { Shop } from "@/app/(app-content)/(dashboard)/shop-firebase/(domain)/shop";
 
 // タイムスタンプライクなオブジェクトの型定義
 interface TimestampLike {

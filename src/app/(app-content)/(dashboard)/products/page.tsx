@@ -4,15 +4,15 @@ import { EyeIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user";
+import { useAuthenticatedUser } from "@/auth/hooks/use-authenticated-user";
 
-import { getSortedCategories } from "../categories/(application)/categories-service";
-import { Category } from "../categories/(domain)/category";
-import ProductsList from "./(presentation)/products-list";
+import { Category } from "@/models/category";
+import ProductsList from "./products-list";
+import { getCategories } from "@/services/categories-service";
 
 export default function ProductsPage() {
   const user = useAuthenticatedUser();
-  const uid = user.uid;
+  const userId = user.userId;
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,7 @@ export default function ProductsPage() {
       try {
         setLoading(true);
         // カテゴリーの取得
-        const sortedCategories = await getSortedCategories(uid);
+        const sortedCategories = await getCategories();
         setCategories(sortedCategories);
       } catch (error) {
         console.error("カテゴリーの取得に失敗しました:", error);
@@ -33,11 +33,11 @@ export default function ProductsPage() {
 
     // 定義した非同期関数を実行
     loadSortedCategories();
-  }, [uid]);
+  }, [userId]);
 
   // プレビューURLを生成する関数
   const getPreviewUrl = () => {
-    return `https://mobile-order-manager-68e65.web.app/?ownerId=${uid}&mode=device`;
+    return `https://mobile-order-manager-68e65.web.app/?ownerId=${userId}&mode=device`;
   };
 
   // プレビューボタンをクリックした時の処理

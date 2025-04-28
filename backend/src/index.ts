@@ -1,0 +1,61 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { testDbConnection } from "./config/database";
+import categoryRoutes from "./routes/categoriesRoutes";
+import categorySequenceRoutes from "./routes/categorySequenceRoutes";
+import productsRoutes from "./routes/productsRoutes";
+import productSequencesRoutes from "./routes/productSequencesRoutes";
+import shopRoutes from "./routes/shopRoutes";
+
+// 環境変数の読み込み
+dotenv.config();
+
+// Expressアプリケーションの初期化
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// ミドルウェアの設定
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// データベース接続テスト
+testDbConnection()
+  .then((isConnected) => {
+    if (!isConnected) {
+      console.error(
+        "データベース接続に失敗しました。アプリケーションを終了します。"
+      );
+      process.exit(1);
+    }
+  })
+  .catch((err) => {
+    console.error("データベース接続テスト中にエラーが発生しました:", err);
+    process.exit(1);
+  });
+
+// ルートの設定
+app.use("/api/categories", categoryRoutes);
+app.use("/api/category-sequence", categorySequenceRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/product-sequences", productSequencesRoutes);
+app.use("/api/shop", shopRoutes);
+// 他のルートをここに追加
+
+// ルートエンドポイント
+app.get("/", (req, res) => {
+  res.send("Payment Test App API");
+});
+
+// 404エラーハンドリング
+app.use((req, res) => {
+  res.status(404).json({ message: "リクエストされたリソースが見つかりません" });
+});
+
+// サーバー起動
+app.listen(PORT, () => {
+  console.log(`サーバーがポート ${PORT} で起動しました`);
+});
+
+export default app;

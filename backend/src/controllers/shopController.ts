@@ -1,0 +1,159 @@
+import { Request, Response } from "express";
+import multer from "multer";
+import { ShopData } from "../models/Shop";
+import {
+  createShopWithImage,
+  updateShopWithImage,
+} from "../services/shopService";
+import { fetchShop } from "../repositories/shopRepository";
+
+// Multerの設定（一時ファイル保存用）
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB制限
+  },
+});
+
+// ショップの新規作成（マルチパートフォームデータ対応）
+export const createShopHandler = async (req: Request, res: Response) => {
+  // multerミドルウェアを使用して画像ファイルを処理
+  upload.single("imageFile")(req, res, async (err) => {
+    if (err) {
+      return res
+        .status(400)
+        .json({ message: "ファイルアップロードエラー: " + err.message });
+    }
+
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "認証されていません" });
+      }
+
+      // フォームデータを取得
+      const shopData = {
+        title: req.body.title,
+        description: req.body.description || null,
+        prefecture: req.body.prefecture,
+        city: req.body.city,
+        streetAddress: req.body.streetAddress,
+        building: req.body.building || null,
+        isVisible: req.body.isVisible === "true",
+        isOrderAccepting: req.body.isOrderAccepting === "true",
+        imageUrl: req.body.imageUrl || "",
+        imagePath: req.body.imagePath || "",
+      };
+
+      // サービス層を呼び出し
+      const result = await createShopWithImage(userId, shopData, req.file);
+
+      if ("error" in result) {
+        return res.status(400).json({
+          message: result.message,
+          error: true,
+        });
+      }
+
+      return res.status(201).json({ id: result.id });
+    } catch (error) {
+      console.error("ショップ作成エラー:", error);
+      return res.status(500).json({
+        message:
+          error instanceof Error
+            ? error.message
+            : "サーバーエラーが発生しました",
+      });
+    }
+  });
+};
+
+// ショップの取得
+export const getShopHandler = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "認証されていません" });
+    }
+
+    const shop = await fetchShop(userId);
+
+    if (!shop) {
+      return res.status(404).json({ message: "店舗情報が見つかりません" });
+    }
+
+    return res.status(200).json(shop);
+  } catch (error) {
+    console.error("ショップ取得エラー:", error);
+    return res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "サーバーエラーが発生しました",
+    });
+  }
+};
+
+// ショップの更新（マルチパートフォームデータ対応）
+export const editShopHandler = async (req: Request, res: Response) => {
+  upload.single("imageFile")(req, res, async (err) => {
+    if (err) {
+      return res
+        .status(400)
+        .json({ message: "ファイルアップロードエラー: " + err.message });
+    }
+
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "認証されていません" });
+      }
+
+      // フォームデータを取得
+      const shopData: Partial<ShopData> = {
+        title: req.body.title,
+        description: req.body.description,
+        prefecture: req.body.prefecture,
+        city: req.body.city,
+        streetAddress: req.body.streetAddress,
+        building: req.body.building,
+        isVisible: req.body.isVisible === "true",
+        isOrderAccepting: req.body.isOrderAccepting === "true",
+        imageUrl: req.body.imageUrl,
+        imagePath: req.body.imagePath,
+      };
+
+      // 不要なundefinedプロパティを削除
+      Object.keys(shopData).forEach((key) => {
+        if (shopData[key as keyof Partial<ShopData>] === undefined) {
+          delete shopData[key as keyof Partial<ShopData>];
+        }
+      });
+
+      // サービス層を呼び出し
+      const result = await updateShopWithImage(
+        userId,
+        shopData,
+        req.file,
+        req.body.oldImagePath
+      );
+
+      if (!result.success) {
+        return res.status(400).json({
+          message: result.message,
+          error: true,
+        });
+      }
+
+      return res
+        .status(200)
+        .json({ message: "店舗情報が正常に更新されました" });
+    } catch (error) {
+      console.error("ショップ更新エラー:", error);
+      return res.status(500).json({
+        message:
+          error instanceof Error
+            ? error.message
+            : "サーバーエラーが発生しました",
+      });
+    }
+  });
+};

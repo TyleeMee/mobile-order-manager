@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/contexts/auth-context-firebase";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const auth = useAuth();

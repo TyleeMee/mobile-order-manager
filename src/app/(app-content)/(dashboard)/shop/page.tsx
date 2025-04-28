@@ -5,13 +5,13 @@ import React, { useEffect, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user";
+import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 import { useToast } from "@/hooks/use-toast";
 
-import { getShop } from "./(application)/shop-service";
-import { Shop } from "./(domain)/shop";
-import CreateShopForm from "./(presentation)/create/create-shop-form";
-import EditShopForm from "./(presentation)/edit/edit-shop-form";
+import { Shop } from "@/models/shop";
+import { getShop } from "@/services/shop-service";
+import EditShopForm from "./edit/edit-shop-form";
+import CreateShopForm from "./create/create-shop-form";
 
 // 店舗データの状態を表す型
 type ShopState = {
@@ -22,7 +22,6 @@ type ShopState = {
 
 export default function ShopPage() {
   const { toast } = useToast();
-  const user = useAuthenticatedUser();
   const [shopState, setShopState] = useState<ShopState>({
     status: "loading",
     data: null,
@@ -32,7 +31,7 @@ export default function ShopPage() {
   useEffect(() => {
     const loadShop = async () => {
       try {
-        const shopData = await getShop(user.uid);
+        const shopData = await getShop();
 
         if (shopData) {
           // データが存在する場合
@@ -64,7 +63,7 @@ export default function ShopPage() {
     };
 
     loadShop();
-  }, [user, toast]);
+  }, [toast]);
 
   // ローディング中の表示
   if (shopState.status === "loading") {

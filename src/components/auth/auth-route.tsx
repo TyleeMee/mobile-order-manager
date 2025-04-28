@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/contexts/auth-context-firebase";
 
 export function AuthRoute({ children }: { children: React.ReactNode }) {
   const auth = useAuth();

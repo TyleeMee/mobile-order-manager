@@ -1,4 +1,4 @@
-import { ProductID } from "../../products/(domain)/product";
+import { ProductID } from "@/models/product";
 
 // OrderStatus enumの定義
 export enum OrderStatus {
