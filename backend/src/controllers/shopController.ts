@@ -31,6 +31,10 @@ export const createShopHandler = async (req: Request, res: Response) => {
         return res.status(401).json({ message: "認証されていません" });
       }
 
+      // デバッグ情報を出力
+      console.log("リクエスト本文:", req.body);
+      console.log("ファイル情報:", req.file);
+
       // フォームデータを取得
       const shopData = {
         title: req.body.title,
@@ -45,8 +49,12 @@ export const createShopHandler = async (req: Request, res: Response) => {
         imagePath: req.body.imagePath || "",
       };
 
+      console.log("作成するショップデータ:", shopData);
+
       // サービス層を呼び出し
       const result = await createShopWithImage(userId, shopData, req.file);
+
+      console.log("サービス層の結果:", result);
 
       if ("error" in result) {
         return res.status(400).json({

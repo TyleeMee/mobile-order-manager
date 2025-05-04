@@ -19,7 +19,9 @@ export const shopSchema = z.object({
   description: z
     .string()
     .max(1000, "説明は1000文字以内で入力してください")
-    .optional(),
+    .nullable()
+    .optional()
+    .default(""),
   prefecture: z
     .enum([
       "北海道",
@@ -82,7 +84,9 @@ export const shopSchema = z.object({
   building: z
     .string()
     .max(200, "建物名は200文字以内で入力してください")
-    .optional(),
+    .nullable()
+    .optional()
+    .default(""),
   isVisible: z.boolean().default(false),
   isOrderAccepting: z.boolean().default(false),
 });

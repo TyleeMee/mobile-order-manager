@@ -19,7 +19,9 @@ export const productSchema = z.object({
   description: z
     .string()
     .max(1000, "説明は1000文字以内で入力してください")
-    .optional(),
+    .nullable()
+    .optional()
+    .default(""),
   price: z
     .number()
     .int("整数で入力してください")

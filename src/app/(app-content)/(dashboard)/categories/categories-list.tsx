@@ -10,15 +10,16 @@ import { GripVertical } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 
 import { Category } from "@/models/category";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
 import EditCategoryDialog from "./(edit}/edit-category-dialog";
 import { getCategories } from "@/services/categories-service";
 import { updateCategorySequence } from "@/services/category-sequnece-service";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 export default function CategoriesList() {
+  const { token } = useAuthToken();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -28,9 +29,16 @@ export default function CategoriesList() {
     // 非同期関数を定義
     const loadSortedCategories = async () => {
       setLoading(true);
+      // トークンがない場合は何もしない
+      if (!token) {
+        console.log(
+          "トークンがまだ準備できていないため、データ取得を待機します"
+        );
+        return;
+      }
       try {
         // カテゴリーの取得
-        const sortedCategories = await getCategories();
+        const sortedCategories = await getCategories(token);
         setCategories(sortedCategories);
       } catch (error) {
         console.error("カテゴリーの取得に失敗しました:", error);
@@ -40,7 +48,7 @@ export default function CategoriesList() {
 
     // 定義した非同期関数を実行
     loadSortedCategories();
-  }, []);
+  }, [token]);
 
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source } = result;
@@ -70,7 +78,10 @@ export default function CategoriesList() {
         setUpdateError(null);
 
         // 順序の永続化 - 商品カテゴリーIDの配列を修正
-        await updateCategorySequence(copy.map((p) => p.id));
+        await updateCategorySequence(
+          token,
+          copy.map((p) => p.id)
+        );
       } catch (error) {
         console.error("商品カテゴリーの順序更新に失敗しました:", error);
         setUpdateError(

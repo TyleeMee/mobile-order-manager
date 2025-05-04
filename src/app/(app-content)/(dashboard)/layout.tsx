@@ -1,4 +1,4 @@
-import { ProtectedRoute } from "@/components/auth/protected-route";
+import { ProtectedRoute } from "@/auth/components/protected-route";
 import DashboardLayout from "@/components/dashboard-responsive-layout";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

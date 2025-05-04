@@ -2,9 +2,9 @@ import { fetchWithAuth } from "./api-client";
 import { CategoryData, CategoryResult, Category } from "@/models/category";
 
 // カテゴリー一覧取得API
-export const getCategories = async () => {
+export const getCategories = async (token: string | null) => {
   try {
-    const response = await fetchWithAuth("/api/categories");
+    const response = await fetchWithAuth("/api/categories", token);
     return response;
   } catch (error) {
     console.error("カテゴリー一覧の取得に失敗しました:", error);
@@ -13,9 +13,9 @@ export const getCategories = async () => {
 };
 
 // 特定のカテゴリー取得API
-export const getCategory = async (id: string) => {
+export const getCategory = async (token: string | null, id: string) => {
   try {
-    const response = await fetchWithAuth(`/api/categories/${id}`);
+    const response = await fetchWithAuth(`/api/categories/${id}`, token);
     return response;
   } catch (error) {
     console.error(`カテゴリー(ID: ${id})の取得に失敗しました:`, error);
@@ -24,9 +24,12 @@ export const getCategory = async (id: string) => {
 };
 
 // カテゴリー作成API
-export const createCategory = async (categoryData: CategoryData) => {
+export const createCategory = async (
+  token: string | null,
+  categoryData: CategoryData
+) => {
   try {
-    return fetchWithAuth("/api/categories", {
+    return fetchWithAuth("/api/categories", token, {
       method: "POST",
       body: JSON.stringify(categoryData),
     });
@@ -37,9 +40,13 @@ export const createCategory = async (categoryData: CategoryData) => {
 };
 
 // カテゴリー更新API
-export const editCategory = async (id: string, categoryData: CategoryData) => {
+export const editCategory = async (
+  token: string | null,
+  id: string,
+  categoryData: CategoryData
+) => {
   try {
-    return fetchWithAuth(`/api/categories/${id}`, {
+    return fetchWithAuth(`/api/categories/${id}`, token, {
       method: "PUT",
       body: JSON.stringify(categoryData),
     });
@@ -50,9 +57,9 @@ export const editCategory = async (id: string, categoryData: CategoryData) => {
 };
 
 // カテゴリー削除API
-export const deleteCategory = async (id: string) => {
+export const deleteCategory = async (token: string | null, id: string) => {
   try {
-    return fetchWithAuth(`/api/categories/${id}`, {
+    return fetchWithAuth(`/api/categories/${id}`, token, {
       method: "DELETE",
     });
   } catch (error) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import AuthButtons from "@/components/auth-buttons";
 import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from "@/contexts/auth-context-firebase";
+import { AuthProvider } from "@/auth/contexts/auth-context";
 import { AmplifyProvider } from "@/auth/provider/amplify-provider";
 
 export default function AppContentLayout({
@@ -27,7 +27,7 @@ export default function AppContentLayout({
           </ul>
         </nav>
         {/* ヘッダーの高さ分のパディングを追加 dashboardのlayout.tsxと重ならないようにする*/}
-        <div className="pt-24">{children}</div>
+        <div className="flex-grow">{children}</div>
         <Toaster />
       </AuthProvider>
     </AmplifyProvider>

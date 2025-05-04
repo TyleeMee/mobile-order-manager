@@ -3,7 +3,7 @@ import { UserRound } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-import { useAuth } from "@/contexts/auth-context-firebase";
+import { useAuth } from "@/auth/contexts/auth-context";
 
 import {
   DropdownMenu,
@@ -25,10 +25,10 @@ export default function AuthButtons() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>
-              <div>{auth.currentUser.displayName}</div>
-              <div className="font-normal text-xs">
+              {/* <div>{auth.currentUser.username}</div> */}
+              {/* <div className="font-normal text-xs">
                 {auth.currentUser.email}
-              </div>
+              </div> */}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem

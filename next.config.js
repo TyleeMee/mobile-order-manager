@@ -2,16 +2,7 @@
 const nextConfig = {
   /* config options here */
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "firebasestorage.googleapis.com", // Firebase Storage の画像
-      },
-      {
-        protocol: "https",
-        hostname: "storage.googleapis.com",
-      },
-    ],
+    domains: ["mobile-order-s3-bucket.s3.ap-northeast-1.amazonaws.com"],
   },
   // 型チェックとESLintをスキップする設定
   typescript: {

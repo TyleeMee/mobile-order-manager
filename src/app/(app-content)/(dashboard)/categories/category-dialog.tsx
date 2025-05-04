@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -96,6 +97,9 @@ export default function CategoryDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>商品カテゴリー</DialogTitle>
+            <DialogDescription className="sr-only">
+              カテゴリー名を入力してください
+            </DialogDescription>
           </DialogHeader>
 
           <Form {...form}>

@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.798.0",
+    "@aws-sdk/client-s3": "^3.802.0",
+    "@aws-sdk/credential-providers": "^3.798.0",
+    "@aws-sdk/s3-request-presigner": "^3.802.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.10.0",
     "@nextui-org/react": "^2.6.11",

@@ -1,13 +1,7 @@
 import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
-import {
   addIdToProductSequence,
   deleteIdFromProductSequence,
   fetchProductSequence,
-  updateProductSequence,
 } from "../repositories/productSequencesRepository";
 import {
   addProduct,
@@ -18,67 +12,7 @@ import {
 } from "../repositories/productsRepository";
 import { Product, ProductData, ProductResult } from "../models/Product";
 import { formatZodError, productSchema } from "@/validation/productSchema";
-
-// S3クライアントの設定
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "ap-northeast-1",
-});
-
-// S3に画像をアップロードする関数
-export const uploadImageToS3 = async (
-  file: Express.Multer.File,
-  userId: string
-): Promise<{ imageUrl: string; imagePath: string }> => {
-  try {
-    const timestamp = Date.now();
-    const filename = `${userId}/${timestamp}_${file.originalname.replace(
-      /\s/g,
-      "_"
-    )}`;
-    const s3Path = `products/${filename}`;
-
-    // S3にアップロード
-    const uploadParams = {
-      Bucket: process.env.S3_BUCKET_NAME || "",
-      Key: s3Path,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    };
-
-    const uploadCommand = new PutObjectCommand(uploadParams);
-    await s3Client.send(uploadCommand);
-
-    // 公開URLを返す
-    const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Path}`;
-
-    return {
-      imageUrl,
-      imagePath: s3Path,
-    };
-  } catch (error) {
-    console.error("S3への画像アップロードに失敗:", error);
-    throw new Error("画像のアップロードに失敗しました");
-  }
-};
-
-// S3から画像を削除する関数
-export const deleteImageFromS3 = async (imagePath: string): Promise<void> => {
-  try {
-    if (!imagePath) return;
-
-    const deleteParams = {
-      Bucket: process.env.S3_BUCKET_NAME || "",
-      Key: imagePath,
-    };
-
-    const deleteCommand = new DeleteObjectCommand(deleteParams);
-    await s3Client.send(deleteCommand);
-    console.log(`画像を削除しました: ${imagePath}`);
-  } catch (error) {
-    console.error("S3からの画像削除に失敗:", error);
-    // エラーはスローせず、ログだけ残す
-  }
-};
+import { deleteImageFromS3, uploadImageToS3 } from "@/utils/s3";
 
 // =====作成メソッド=====
 
@@ -102,7 +36,11 @@ export const createProductWithImage = async (
     // 新しい画像ファイルがある場合は処理
     if (imageFile) {
       try {
-        const { imageUrl, imagePath } = await uploadImageToS3(imageFile, uid);
+        const { imageUrl, imagePath } = await uploadImageToS3(
+          imageFile,
+          uid,
+          "products"
+        );
         productData.imageUrl = imageUrl;
         productData.imagePath = imagePath;
       } catch (error) {
@@ -223,7 +161,11 @@ export const updateProductWithImage = async (
     // 新しい画像ファイルがある場合は処理
     if (imageFile) {
       try {
-        const { imageUrl, imagePath } = await uploadImageToS3(imageFile, uid);
+        const { imageUrl, imagePath } = await uploadImageToS3(
+          imageFile,
+          uid,
+          "products"
+        );
         productData.imageUrl = imageUrl;
         productData.imagePath = imagePath;
 

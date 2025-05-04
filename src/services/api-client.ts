@@ -4,12 +4,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 // トークン付きでのリクエスト
 export const fetchWithAuth = async (
   endpoint: string,
+  token: string | null,
   options: RequestInit = {}
 ) => {
-  const { getAuthToken } = useAuthToken();
-  const token = await getAuthToken();
-
   if (!token) {
+    console.error("認証トークンが指定されていません");
     throw new Error("認証トークンが取得できませんでした");
   }
 

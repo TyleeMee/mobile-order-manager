@@ -8,17 +8,21 @@ import { useToast } from "@/hooks/use-toast";
 
 import { createProduct } from "@/services/products-service";
 import ProductForm from "../product-form";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 type Props = {
   categoryId: string;
 };
 
 export default function CreateProductForm({ categoryId }: Props) {
+  const { token } = useAuthToken();
   const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (formdata: FormData) => {
-    const response = await createProduct(categoryId, formdata);
+    if (!token) return; // トークンがない場合は早期リターン
+    //TODO token === nullの時、createProductが実行されないことになる？
+    const response = await createProduct(token, categoryId, formdata);
     if (!!response.error) {
       toast({
         title: "保存に失敗しました",

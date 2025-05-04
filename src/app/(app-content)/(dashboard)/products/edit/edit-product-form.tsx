@@ -9,12 +9,14 @@ import { useToast } from "@/hooks/use-toast";
 import { editProduct, getProduct } from "@/services/products-service";
 import { Product } from "@/models/product";
 import ProductForm from "../product-form";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 type Props = {
   productId: string;
 };
 
 export default function EditProductForm({ productId }: Props) {
+  const { token } = useAuthToken();
   const { toast } = useToast();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
@@ -23,8 +25,15 @@ export default function EditProductForm({ productId }: Props) {
   // useEffectを使用してデータを取得
   useEffect(() => {
     const loadProduct = async () => {
+      // トークンがない場合は何もしない
+      if (!token) {
+        console.log(
+          "トークンがまだ準備できていないため、データ取得を待機します"
+        );
+        return;
+      }
       try {
-        const productData = await getProduct(productId);
+        const productData = await getProduct(token, productId);
         setProduct(productData);
       } catch (error) {
         console.error("商品データの取得に失敗しました:", error);
@@ -39,11 +48,11 @@ export default function EditProductForm({ productId }: Props) {
     };
 
     loadProduct();
-  }, [productId, toast]);
+  }, [token, productId, toast]);
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      const response = await editProduct(productId, formData);
+      const response = await editProduct(token, productId, formData);
       if (!!response.error) {
         toast({
           title: "エラー",
@@ -97,7 +106,7 @@ export default function EditProductForm({ productId }: Props) {
           title: product.title,
           imageUrl: product.imageUrl,
           imagePath: product.imagePath,
-          description: product.description,
+          description: product.description || "",
           price: product.price,
           isVisible: product.isVisible,
           isOrderAccepting: product.isOrderAccepting,

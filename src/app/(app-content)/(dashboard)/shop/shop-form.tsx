@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ShopFormValues } from "@/models/shop";
+import { toast } from "@/hooks/use-toast";
 
 type Props = {
   submitButtonLabel: React.ReactNode;
@@ -90,7 +91,16 @@ export default function ShopForm({
 
       // フォームの値をFormDataに追加
       const formValues = form.getValues();
+
       Object.entries(formValues).forEach(([key, value]) => {
+        // _hasImageFileと内部フィールドはスキップ
+        if (key === "_hasImageFile" || key.startsWith("_")) {
+          return;
+        }
+        // pending-uploadはスキップする（imageUrlとimagePathに対して）
+        if (value === "pending-upload") {
+          return;
+        }
         // booleanの場合は文字列に変換
         if (typeof value === "boolean") {
           formData.append(key, value.toString());
@@ -110,7 +120,13 @@ export default function ShopForm({
           formData.append("oldImagePath", combinedDefaultValues.imagePath);
         }
       }
-
+      //TODO以下のデバッグコードを削除
+      // FormDataの内容をログに出力
+      console.log("FormData内容:");
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      //
       // フォーム送信（FormDataをそのまま渡す）
       await handleSubmitAction(formData);
     } catch (error) {

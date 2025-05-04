@@ -7,18 +7,36 @@ import categorySequenceRoutes from "./routes/categorySequenceRoutes";
 import productsRoutes from "./routes/productsRoutes";
 import productSequencesRoutes from "./routes/productSequencesRoutes";
 import shopRoutes from "./routes/shopRoutes";
+import ordersRoutes from "./routes/ordersRoutes";
+import { testS3Connection } from "./utils/s3";
 
 // 環境変数の読み込み
 dotenv.config();
 
 // Expressアプリケーションの初期化
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // ミドルウェアの設定
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// S3接続テスト
+testS3Connection()
+  .then((isConnected) => {
+    if (isConnected) {
+      console.log("S3接続テスト成功 - アップロード機能は正常に動作します");
+    } else {
+      console.warn(
+        "S3接続テスト失敗 - 画像アップロード機能が動作しない可能性があります"
+      );
+    }
+  })
+  .catch((err) => {
+    console.error("S3接続テスト中にエラーが発生しました:", err);
+    console.warn("画像アップロード機能が動作しない可能性があります");
+  });
 
 // データベース接続テスト
 testDbConnection()
@@ -41,6 +59,7 @@ app.use("/api/category-sequence", categorySequenceRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/product-sequences", productSequencesRoutes);
 app.use("/api/shop", shopRoutes);
+app.use("/api/orders", ordersRoutes);
 // 他のルートをここに追加
 
 // ルートエンドポイント

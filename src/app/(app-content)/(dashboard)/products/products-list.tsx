@@ -14,7 +14,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 
 import { Category } from "@/models/category";
 import { updateProductSequence } from "@/services/product-sequences-service";
@@ -22,6 +21,7 @@ import { Product } from "@/models/product";
 import CreateCategoryDialog from "../categories/(create)/create-category-dialog";
 import { getProductsInCategory } from "@/services/products-service";
 import { DeleteProductDialog } from "./delete-product-dialog";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 type Props = {
   categories: Category[];
@@ -29,6 +29,7 @@ type Props = {
 };
 
 export default function ProductsList({ categories, loading = false }: Props) {
+  const { token } = useAuthToken();
   const [productsByCategory, setProductsByCategory] = useState<
     Record<string, Product[]>
   >({});
@@ -41,10 +42,18 @@ export default function ProductsList({ categories, loading = false }: Props) {
       setProductsLoading(true);
       const productsMap: Record<string, Product[]> = {};
 
+      // トークンがない場合は何もしない
+      if (!token) {
+        console.log(
+          "トークンがまだ準備できていないため、データ取得を待機します"
+        );
+        return;
+      }
+
       await Promise.all(
         categories.map(async (category) => {
           try {
-            const products = await getProductsInCategory(category.id);
+            const products = await getProductsInCategory(token, category.id);
             productsMap[category.id] = products;
           } catch (error) {
             console.error(
@@ -65,9 +74,10 @@ export default function ProductsList({ categories, loading = false }: Props) {
     } else {
       setProductsLoading(false);
     }
-  }, [categories]);
+  }, [token, categories]);
 
   const handleDragEnd = async (result: DropResult) => {
+    if (!token) return; // トークンがない場合は早期リターン
     const { destination, source } = result;
 
     // ドロップ先がない場合や、同じ位置にドロップした場合は何もしない
@@ -103,6 +113,7 @@ export default function ProductsList({ categories, loading = false }: Props) {
 
         // 順序の永続化 - 商品IDの配列のみを渡す
         await updateProductSequence(
+          token,
           categoryId,
           products.map((p) => p.id)
         );

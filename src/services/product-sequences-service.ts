@@ -1,10 +1,14 @@
 import { fetchWithAuth } from "./api-client";
 
 // カテゴリ内の商品順序取得API
-export const getProductSequence = async (categoryId: string) => {
+export const getProductSequence = async (
+  token: string | null,
+  categoryId: string
+) => {
   try {
     const response = await fetchWithAuth(
-      `/api/product-sequences/category/${categoryId}`
+      `/api/product-sequences/category/${categoryId}`,
+      token
     );
     return response;
   } catch (error) {
@@ -18,11 +22,12 @@ export const getProductSequence = async (categoryId: string) => {
 
 // 商品順序更新API（全体を更新）
 export const updateProductSequence = async (
+  token: string | null,
   categoryId: string,
   productIds: string[]
 ) => {
   try {
-    return fetchWithAuth("/api/product-sequences", {
+    return fetchWithAuth("/api/product-sequences", token, {
       method: "PUT",
       body: JSON.stringify({ categoryId, productIds }),
     });

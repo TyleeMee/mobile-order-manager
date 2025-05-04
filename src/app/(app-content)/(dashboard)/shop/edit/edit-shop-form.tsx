@@ -10,18 +10,22 @@ import { useToast } from "@/hooks/use-toast";
 import { editShop } from "@/services/shop-service";
 import { Shop } from "@/models/shop";
 import ShopForm from "../shop-form";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 type Props = {
   shop: Shop;
 };
 
 export default function EditShopForm({ shop }: Props) {
+  const { token } = useAuthToken();
   const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (formData: FormData) => {
+    if (!token) return; // トークンがない場合は早期リターン
+    //TODO token === nullの時、editShopが実行されないことになる？
     try {
-      const response = await editShop(formData);
+      const response = await editShop(token, formData);
       if (!!response.error) {
         toast({
           title: "エラー",
@@ -36,7 +40,7 @@ export default function EditShopForm({ shop }: Props) {
         variant: "success",
       });
 
-      router.push("/products");
+      router.push("/shop");
 
       console.log({ response });
     } catch (error) {
@@ -63,11 +67,11 @@ export default function EditShopForm({ shop }: Props) {
           title: shop.title,
           imageUrl: shop.imageUrl,
           imagePath: shop.imagePath,
-          description: shop.description,
+          description: shop.description || "", // null対策
           prefecture: shop.prefecture,
           city: shop.city,
           streetAddress: shop.streetAddress,
-          building: shop.building,
+          building: shop.building || "", // null対策
           isVisible: shop.isVisible,
           isOrderAccepting: shop.isOrderAccepting,
         }}

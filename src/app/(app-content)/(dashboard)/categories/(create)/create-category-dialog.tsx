@@ -5,18 +5,22 @@ import React from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 import { useToast } from "@/hooks/use-toast";
 import { categorySchema } from "@/validation/category-schema";
 
 import CategoryDialog from "../category-dialog";
 import { createCategory } from "@/services/categories-service";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 export default function CreateCategoryDialog() {
+  const { token } = useAuthToken();
   const { toast } = useToast();
 
   const handleSubmit = async (data: z.infer<typeof categorySchema>) => {
-    const response = await createCategory(data);
+    if (!token) return; // トークンがない場合は早期リターン
+    //TODO token === nullの時、createCategoryが実行されないことになる？
+    //TODO loadingStateやtrycathcは設けなくて良いの？（deleteCategoryDialog参照）
+    const response = await createCategory(token, data);
 
     if (!!response.error) {
       toast({

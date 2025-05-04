@@ -3,39 +3,44 @@
 import { fetchAuthSession } from "aws-amplify/auth";
 import { useCallback, useEffect, useState } from "react";
 
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "../contexts/auth-context";
 
 export const useAuthToken = () => {
-  const { toast } = useToast();
-  const user = useAuthenticatedUser();
+  const auth = useAuth();
+  const user = auth?.currentUser;
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const getAuthToken = useCallback(async () => {
     try {
       setIsLoading(true);
+      // ユーザーが認証されていない場合は早期リターン
+      if (!user) {
+        setToken(null);
+        return null;
+      }
       // 現在のセッションからトークンを取得
       const session = await fetchAuthSession();
       // JWTアクセストークンを取得
       const accessToken = session.tokens?.accessToken?.toString();
       setToken(accessToken || null);
+      //
       return accessToken;
     } catch (error) {
       console.error("認証トークンの取得に失敗しました:", error);
-      toast({
-        title: "エラー",
-        description: "認証情報の取得に失敗しました。再度ログインしてください。",
-        variant: "destructive",
-      });
       return null;
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [user]);
 
   // 初期ロード時にトークンを取得
   useEffect(() => {
+    // auth.loadingの状態も考慮
+    if (auth?.loading) {
+      return; // まだロード中なので何もしない
+    }
+
     if (user) {
       getAuthToken();
     } else {

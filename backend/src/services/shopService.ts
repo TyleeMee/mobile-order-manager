@@ -1,74 +1,7 @@
-// S3アップロード用のサービス
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
+import { deleteImageFromS3, uploadImageToS3 } from "@/utils/s3";
 import { ShopData } from "../models/Shop";
 import { addShop, updateShop } from "../repositories/shopRepository";
 import { formatZodError, shopSchema } from "../validation/shopSchema";
-
-// S3クライアントの設定
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "ap-northeast-1",
-});
-
-// S3に画像をアップロードする関数
-export const uploadImageToS3 = async (
-  file: Express.Multer.File,
-  userId: string
-): Promise<{ imageUrl: string; imagePath: string }> => {
-  try {
-    const timestamp = Date.now();
-    const filename = `${userId}/${timestamp}_${file.originalname.replace(
-      /\s/g,
-      "_"
-    )}`;
-    const s3Path = `shops/${filename}`;
-
-    // S3にアップロード
-    const uploadParams = {
-      Bucket: process.env.S3_BUCKET_NAME || "",
-      Key: s3Path,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    };
-
-    const uploadCommand = new PutObjectCommand(uploadParams);
-    await s3Client.send(uploadCommand);
-
-    // 公開URLを返す
-    // TODO（バケットの設定によって変わる可能性あり 特にCloudFront使用時）
-    const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Path}`;
-
-    return {
-      imageUrl,
-      imagePath: s3Path,
-    };
-  } catch (error) {
-    console.error("S3への画像アップロードに失敗:", error);
-    throw new Error("画像のアップロードに失敗しました");
-  }
-};
-
-// S3から画像を削除する関数
-export const deleteImageFromS3 = async (imagePath: string): Promise<void> => {
-  try {
-    if (!imagePath) return;
-
-    const deleteParams = {
-      Bucket: process.env.S3_BUCKET_NAME || "",
-      Key: imagePath,
-    };
-
-    const deleteCommand = new DeleteObjectCommand(deleteParams);
-    await s3Client.send(deleteCommand);
-    console.log(`画像を削除しました: ${imagePath}`);
-  } catch (error) {
-    console.error("S3からの画像削除に失敗:", error);
-    // エラーはスローせず、ログだけ残す
-  }
-};
 
 // ショップの作成（画像処理を含む）
 export const createShopWithImage = async (
@@ -77,12 +10,18 @@ export const createShopWithImage = async (
   imageFile?: Express.Multer.File
 ): Promise<{ id: string } | { error: boolean; message: string }> => {
   try {
+    console.log("サービス層: 受信したデータ", {
+      userId,
+      shopData,
+      ファイル: imageFile ? "あり" : "なし",
+    });
     // バリデーション（画像ファイルがある場合は画像URLとパスの検証をスキップ）
     const validationSchema = imageFile
       ? shopSchema.omit({ imageUrl: true, imagePath: true })
       : shopSchema;
 
     const validation = validationSchema.safeParse(shopData);
+    console.log("バリデーション結果:", validation.success ? "成功" : "失敗");
     if (!validation.success) {
       return formatZodError(validation.error);
     }
@@ -92,7 +31,8 @@ export const createShopWithImage = async (
       try {
         const { imageUrl, imagePath } = await uploadImageToS3(
           imageFile,
-          userId
+          userId,
+          "shops"
         );
         shopData.imageUrl = imageUrl;
         shopData.imagePath = imagePath;
@@ -144,7 +84,8 @@ export const updateShopWithImage = async (
       try {
         const { imageUrl, imagePath } = await uploadImageToS3(
           imageFile,
-          userId
+          userId,
+          "shops"
         );
         shopData.imageUrl = imageUrl;
         shopData.imagePath = imagePath;

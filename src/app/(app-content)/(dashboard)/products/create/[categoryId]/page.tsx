@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import CreateProductForm from "../create-product-form";
 
-export default function Page({ params }: { params: Params }) {
-  const categoryId = params.categoryId as string;
+export default async function Page({ params }: { params: Params }) {
+  const { categoryId } = await params;
 
   return (
     <div>
@@ -15,7 +15,7 @@ export default function Page({ params }: { params: Params }) {
           <CardTitle className="text-xl font-bold">商品登録</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreateProductForm categoryId={categoryId} />
+          <CreateProductForm categoryId={categoryId as string} />
         </CardContent>
       </Card>
     </div>

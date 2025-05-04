@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { getImagesFromFolder } from "@/lib/firebase/firebase-storage";
+import { getImagesFromS3Folder } from "@/lib/s3-utils";
 
 // 静的ページ生成のためのデータフェッチ
+//TODO 画像取得・表示ロジックを完成させる　できればSSRで
 async function getHomeImage() {
-  // 'home/' はFirebase Storage内のフォルダパス
-  //TODO (注意)クライアントサイドでの画像取得ロジック
-  const imageData = await getImagesFromFolder("home/");
+  // 'home/' はS3バケット内のフォルダパス
+  const imageData = await getImagesFromS3Folder("home/");
   return imageData.length > 0 ? imageData[0] : null;
 }
 
@@ -46,7 +46,6 @@ export default async function Home() {
               </div>
             </div>
           </div>
-
           {/* 画像表示（画像がない場合は白い背景のみ） */}
           <div className="w-full md:w-1/2 aspect-square bg-white rounded-lg overflow-hidden relative">
             {homeImage && homeImage.url && (

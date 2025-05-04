@@ -15,8 +15,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user-firebase";
 import { deleteCategory } from "@/services/categories-service";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 // 商品削除ダイアログのプロパティ型定義
 type Props = {
@@ -25,6 +25,7 @@ type Props = {
 };
 
 export function DeleteCategoryDialog({ categoryId, categoryTitle }: Props) {
+  const { token } = useAuthToken();
   // 削除中の状態管理
   const [isDeleting, setIsDeleting] = React.useState(false);
   // エラーメッセージの状態管理
@@ -32,11 +33,13 @@ export function DeleteCategoryDialog({ categoryId, categoryTitle }: Props) {
 
   // 削除処理を実行する関数
   const handleDelete = async () => {
+    if (!token) return; // トークンがない場合は早期リターン
+    //TODO token === nullの時、deleteCategoryが実行されないことになる？
     let success = false;
     try {
       setIsDeleting(true); // 削除中状態を設定
       setError(null); // エラーをリセット
-      await deleteCategory(categoryId); // 実際の削除処理を実行
+      await deleteCategory(token, categoryId); // 実際の削除処理を実行
       success = true; // エラーが発生しなかった場合のみtrueに設定
     } catch (err) {
       console.error("商品の削除に失敗しました:", err);
