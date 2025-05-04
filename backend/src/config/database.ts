@@ -41,7 +41,7 @@ export const getPool = async (): Promise<Pool> => {
   // AWS SDKを使用する場合はRDSエンドポイントを取得
   try {
     const rdsClient = new RDSClient({
-      region: process.env.AWS_REGION || "ap-northeast-1",
+      region: process.env.PUBLIC_REGION || "ap-northeast-1",
       credentials: fromIni({ profile: "myprofile" }),
     });
 
