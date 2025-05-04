@@ -26,7 +26,7 @@ export interface UploadResult {
 // 環境に応じたS3クライアント設定を取得する関数
 const getS3ClientConfig = () => {
   const config = {
-    region: process.env.AWS_REGION || "ap-northeast-1",
+    region: process.env.NEXT_PUBLIC_REGION || "ap-northeast-1",
   };
 
   // ローカル環境でのみプロファイルを使用

@@ -15,7 +15,7 @@ import {
 // 環境に応じた認証情報の設定
 const getClientConfig = () => {
   const config = {
-    region: process.env.AWS_REGION || "ap-northeast-1",
+    region: process.env.NEXT_PUBLIC_REGION || "ap-northeast-1",
   };
 
   // ローカル環境でのみプロファイルを使用
