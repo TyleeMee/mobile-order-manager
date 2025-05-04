@@ -1,3 +1,5 @@
+const path = require("path"); // ← 追加
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
@@ -10,6 +12,12 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+
+  // ここから追加：webpackのエイリアス設定
+  webpack: (config) => {
+    config.resolve.alias["@"] = path.resolve(__dirname, "src");
+    return config;
   },
 };
 
