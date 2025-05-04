@@ -13,6 +13,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  output: "standalone",
 
   // ここから追加：webpackのエイリアス設定
   webpack: (config) => {
