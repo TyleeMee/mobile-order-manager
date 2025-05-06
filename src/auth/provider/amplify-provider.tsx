@@ -24,6 +24,20 @@ export function AmplifyProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // クライアントサイドでのみ実行
     if (typeof window !== "undefined") {
+      console.log("環境変数確認:", {
+        userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
+        clientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+        region: process.env.NEXT_PUBLIC_REGION,
+      });
+
+      // 設定が空でないことを確認する条件チェック
+      if (
+        !process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ||
+        !process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID
+      ) {
+        console.error("Cognito環境変数が設定されていません！");
+      }
+      //
       Amplify.configure(amplifyConfig);
       // 必要に応じてプロバイダーを設定
       cognitoUserPoolsTokenProvider.setAuthConfig(amplifyConfig.Auth);
