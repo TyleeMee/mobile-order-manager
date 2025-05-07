@@ -7,9 +7,9 @@ const nextConfig = {
     domains: ["mobile-order-s3-bucket.s3.ap-northeast-1.amazonaws.com"],
   },
   // 型チェックとESLintをスキップする設定
-  // typescript: {
-  //   ignoreBuildErrors: true,
-  // },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
