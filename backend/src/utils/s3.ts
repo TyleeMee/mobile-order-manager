@@ -9,7 +9,7 @@ import {
 // 環境に応じたS3クライアント設定を取得する関数
 const getS3ClientConfig = () => {
   const config = {
-    region: process.env.PUBLIC_REGION || "ap-northeast-1",
+    region: process.env.REGION || "ap-northeast-1",
   };
 
   // ローカル環境でのみプロファイルを使用
@@ -45,7 +45,7 @@ export const uploadImageToS3 = async (
   try {
     console.log("S3アップロード開始:", {
       バケット名: process.env.S3_BUCKET_NAME,
-      リージョン: process.env.PUBLIC_REGION,
+      リージョン: process.env.REGION,
       ファイル名: file.originalname,
       ユーザーID: userId,
       フォルダパス: folderPath,
@@ -71,7 +71,7 @@ export const uploadImageToS3 = async (
 
     // 公開URLを返す
     // TODO（バケットの設定によって変わる可能性あり 特にCloudFront使用時）
-    const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.PUBLIC_REGION}.amazonaws.com/${s3Path}`;
+    const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/${s3Path}`;
 
     return {
       imageUrl,

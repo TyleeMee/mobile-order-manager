@@ -35,13 +35,14 @@ export const getPool = async (): Promise<Pool> => {
   }
   // AWS SDKを使用しない場合は既存のプールを返す
   if (process.env.NODE_ENV === "production") {
+    console.log("本番環境: 直接DB_HOSTを使用します");
     return pool;
   }
 
   // AWS SDKを使用する場合はRDSエンドポイントを取得
   try {
     const rdsClient = new RDSClient({
-      region: process.env.PUBLIC_REGION || "ap-northeast-1",
+      region: process.env.REGION || "ap-northeast-1",
       credentials: fromIni({ profile: "myprofile" }),
     });
 
