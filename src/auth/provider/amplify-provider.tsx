@@ -10,7 +10,7 @@ const amplifyConfig = {
     Cognito: {
       userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || "",
       userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "",
-      region: process.env.NEXT_PUBLIC_REGION || "ap-northeast-1",
+      region: process.env.REGION || "ap-northeast-1",
       loginWith: {
         email: true,
       },
@@ -27,7 +27,7 @@ export function AmplifyProvider({ children }: { children: ReactNode }) {
       console.log("環境変数確認:", {
         userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
         clientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
-        region: process.env.NEXT_PUBLIC_REGION,
+        region: process.env.REGION,
       });
 
       // 設定が空でないことを確認する条件チェック

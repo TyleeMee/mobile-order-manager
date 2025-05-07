@@ -2,7 +2,6 @@
 
 import { registerUserSchema } from "@/validation/auth-user-schema";
 import { addCognitoUser } from "../repositories/auth-repository";
-import { getCognitoErrorMessage } from "@/lib/error-messages/cognito-errors";
 
 // Cognitoのエラー型を定義
 interface CognitoError {

@@ -26,7 +26,7 @@ export interface UploadResult {
 // 環境に応じたS3クライアント設定を取得する関数
 const getS3ClientConfig = () => {
   const config = {
-    region: process.env.NEXT_PUBLIC_REGION || "ap-northeast-1",
+    region: process.env.REGION || "ap-northeast-1",
   };
 
   // ローカル環境でのみプロファイルを使用
@@ -37,7 +37,17 @@ const getS3ClientConfig = () => {
     };
   }
 
-  // 本番環境ではIAMロールに依存するため、明示的な認証情報は不要
+  // Vercel環境では環境変数からキーを取得
+  if (process.env.ACCESS_KEY_ID && process.env.SECRET_ACCESS_KEY) {
+    return {
+      ...config,
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY_ID,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+      },
+    };
+  }
+
   return config;
 };
 

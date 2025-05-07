@@ -15,7 +15,7 @@ import {
 // 環境に応じた認証情報の設定
 const getClientConfig = () => {
   const config = {
-    region: process.env.NEXT_PUBLIC_REGION || "ap-northeast-1",
+    region: process.env.REGION || "ap-northeast-1",
   };
 
   // ローカル環境でのみプロファイルを使用
@@ -26,7 +26,17 @@ const getClientConfig = () => {
     };
   }
 
-  // 本番環境ではIAMロールに依存するため、明示的な認証情報は不要
+  // Vercel環境では環境変数からキーを取得
+  if (process.env.ACCESS_KEY_ID && process.env.SECRET_ACCESS_KEY) {
+    return {
+      ...config,
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY_ID,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+      },
+    };
+  }
+
   return config;
 };
 
