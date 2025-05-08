@@ -8,8 +8,8 @@ import path from "path";
 // 環境変数の読み込み
 dotenv.config();
 
-// SSL設定を無効化
-const sslConfig = false; // false でSSLを完全に無効化
+// SSL設定（環境に応じて動的に設定）
+let sslConfig: any = { rejectUnauthorized: false }; // 開発環境のデフォルト
 
 //TODO エラー発生するので、暫定的にスキップするが、後で以下のコードを有効化
 // TODO: 優先度: 中 - SSL証明書検証の有効化
@@ -17,8 +17,6 @@ const sslConfig = false; // false でSSLを完全に無効化
 // 2. 証明書検証を有効にするコードのコメントを解除
 // 3. テスト後に本番環境にデプロイ
 //
-// SSL設定（環境に応じて動的に設定）
-// let sslConfig: any = { rejectUnauthorized: false }; // 開発環境のデフォルト
 // 本番環境で証明書を読み込む
 // if (process.env.NODE_ENV === "production") {
 //   // CA証明書パスの設定
