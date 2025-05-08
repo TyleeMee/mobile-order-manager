@@ -15,6 +15,8 @@ let sslConfig: any = { rejectUnauthorized: false }; // 開発環境のデフォ�
 if (process.env.NODE_ENV === "production") {
   // CA証明書パスの設定
   const caCertPath = path.join(__dirname, "../certs/global-bundle.pem");
+  console.log("証明書ファイルのパス:", caCertPath);
+  console.log("証明書ファイル存在確認:", fs.existsSync(caCertPath));
   try {
     // 証明書ファイルが存在するか確認
     if (fs.existsSync(caCertPath)) {
@@ -23,6 +25,7 @@ if (process.env.NODE_ENV === "production") {
         ca: caCert,
         rejectUnauthorized: true,
       };
+      console.log("最終的なSSL設定:", JSON.stringify(sslConfig));
       console.log("本番環境: SSL証明書を設定しました");
     } else {
       console.warn(
