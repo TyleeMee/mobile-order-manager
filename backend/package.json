@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node -r ./module-alias.js dist/index.js",
     "dev": "nodemon --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
-    "build": "tsc",
+    "build": "tsc && npm run copy-certs",
+    "copy-certs": "mkdir -p dist/certs && cp -r src/certs/* dist/certs/ 2>/dev/null || true",
     "test": "jest",
     "lint": "eslint . --ext .ts",
     "pm2": "npm run build && pm2 start dist/index.js --name payment-api",

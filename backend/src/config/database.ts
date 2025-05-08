@@ -2,14 +2,42 @@ import { Pool, PoolClient } from "pg";
 import dotenv from "dotenv";
 import { fromIni } from "@aws-sdk/credential-providers";
 import { RDSClient, DescribeDBInstancesCommand } from "@aws-sdk/client-rds";
+import fs from "fs";
+import path from "path";
 
 // 環境変数の読み込み
 dotenv.config();
 
-const sslConfig =
-  process.env.NODE_ENV === "production"
-    ? { rejectUnauthorized: true } // 本番環境: 証明書検証あり
-    : { rejectUnauthorized: false }; // 開発環境: 証明書検証なし(sshでEC2に接続するとエラーが起きるため)
+// SSL設定（環境に応じて動的に設定）
+let sslConfig: any = { rejectUnauthorized: false }; // 開発環境のデフォルト
+
+// 本番環境で証明書を読み込む
+if (process.env.NODE_ENV === "production") {
+  // CA証明書パスの設定
+  const caCertPath = path.join(__dirname, "../certs/global-bundle.pem");
+  try {
+    // 証明書ファイルが存在するか確認
+    if (fs.existsSync(caCertPath)) {
+      const caCert = fs.readFileSync(caCertPath).toString();
+      sslConfig = {
+        ca: caCert,
+        rejectUnauthorized: true,
+      };
+      console.log("本番環境: SSL証明書を設定しました");
+    } else {
+      console.warn(
+        "警告: SSL証明書ファイルが見つかりません。証明書検証をスキップします"
+      );
+    }
+  } catch (error) {
+    console.error("SSL証明書の読み込みに失敗しました:", error);
+    console.warn(
+      "警告: SSL接続でもエラー発生を防ぐため、証明書検証をスキップします"
+    );
+  }
+} else {
+  console.log("開発環境: SSL証明書の検証をスキップします");
+}
 
 // データベース接続設定（基本設定）
 const dbConfig = {
