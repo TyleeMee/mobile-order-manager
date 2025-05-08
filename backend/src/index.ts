@@ -9,6 +9,7 @@ import productSequencesRoutes from "./routes/productSequencesRoutes";
 import shopRoutes from "./routes/shopRoutes";
 import ordersRoutes from "./routes/ordersRoutes";
 import { testS3Connection } from "./utils/s3";
+import healthRoutes from "./routes/healthRoutes";
 
 // 環境変数の読み込み
 dotenv.config();
@@ -18,7 +19,22 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // ミドルウェアの設定
-app.use(cors());
+// app.use(cors());
+//TODO 250508に下記に変更、ダメなら上記に戻す。
+// CORSの設定 - 全てのオリジンを許可
+app.use(
+  cors({
+    //TODO  本番環境では '*' は避けるべき
+    origin:
+      process.env.NODE_ENV === "development"
+        ? "*" // 開発環境（フロントエンドのURL）
+        : "*", // 本番環境
+
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,6 +68,9 @@ testDbConnection()
     console.error("データベース接続テスト中にエラーが発生しました:", err);
     process.exit(1);
   });
+
+// ヘルスチェック用のルート（ALBのヘルスチェック用）
+app.use("/health", healthRoutes);
 
 // ルートの設定
 app.use("/api/categories", categoryRoutes);
