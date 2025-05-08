@@ -15,7 +15,7 @@ let sslConfig: any = { rejectUnauthorized: false }; // 開発環境のデフォ�
 if (process.env.NODE_ENV === "production") {
   // CA証明書パスの設定
   console.log("証明書ファイルのパス:読み込み開始");
-  const caCertPath = path.join(__dirname, "../certs/truststore.pem");
+  const caCertPath = path.join(__dirname, "../certs/ap-northeast-1-bundle.pem");
   console.log("証明書ファイルのパス:", caCertPath);
   console.log("証明書ファイル存在確認:", fs.existsSync(caCertPath));
   try {
