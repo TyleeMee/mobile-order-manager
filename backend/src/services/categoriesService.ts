@@ -1,7 +1,7 @@
 import {
   deleteProduct,
   fetchProductsInCategory,
-} from "@/repositories/productsRepository";
+} from "../repositories/productsRepository";
 import { CategoryData, CategoryResult } from "../models/Category";
 import {
   addCategory,
@@ -15,7 +15,7 @@ import {
   deleteCategorySequence,
   fetchCategorySequence,
 } from "../repositories/categorySequenceRepository";
-import { deleteProductSequence } from "@/repositories/productSequencesRepository";
+import { deleteProductSequence } from "../repositories/productSequencesRepository";
 
 //TODO
 // Productのインポートとリポジトリメソッドはここでは省略
