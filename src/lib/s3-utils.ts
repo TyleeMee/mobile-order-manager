@@ -93,6 +93,9 @@ export async function getImagesFromS3Folder(
       );
     });
 
+    // ISRでの再検証のために、URLの生成時刻をログに記録
+    console.log(`署名付きURL生成時刻: ${new Date().toISOString()}`);
+
     // 各画像ファイルのURLを生成
     const imageData = await Promise.all(
       imageFiles.map(async (file: _Object) => {
@@ -100,13 +103,18 @@ export async function getImagesFromS3Folder(
           throw new Error("ファイルキーが見つかりません");
         }
 
+        // 署名付きURLの有効期限を6時間に延長 (ISRの再検証よりも十分長く)
+        const expiresIn = 6 * 60 * 60; // 6時間
+
         // 署名付きURLを生成（有効期限は1時間）
         const command = new GetObjectCommand({
           Bucket: process.env.S3_BUCKET_NAME || "",
           Key: file.Key,
         });
 
-        const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+        const url = await getSignedUrl(s3Client, command, {
+          expiresIn: expiresIn,
+        });
 
         const imageData: ImageData = {
           name: file.Key.split("/").pop() || "",
