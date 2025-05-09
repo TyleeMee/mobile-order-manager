@@ -11,7 +11,7 @@ dotenv.config();
 // SSL設定（環境に応じて動的に設定）
 let sslConfig: any = {
   rejectUnauthorized: false, // SSL証明書の検証をスキップ
-  ssl: true, // SSL接続を要求
+  // ssl: true, // SSL接続を要求
 };
 
 //TODO エラー発生するので、暫定的にスキップするが、後で以下のコードを有効化
@@ -21,35 +21,35 @@ let sslConfig: any = {
 // 3. テスト後に本番環境にデプロイ
 //
 // 本番環境で証明書を読み込む
-// if (process.env.NODE_ENV === "production") {
-//   // CA証明書パスの設定
-//   console.log("証明書ファイルのパス:読み込み開始");
-//   const caCertPath = path.join(__dirname, "../certs/ap-northeast-1-bundle.pem");
-//   console.log("証明書ファイル存在確認:", fs.existsSync(caCertPath));
-//   try {
-//     // 証明書ファイルが存在するか確認
-//     if (fs.existsSync(caCertPath)) {
-//       const caCert = fs.readFileSync(caCertPath).toString();
-//       sslConfig = {
-//         ca: caCert,
-//         rejectUnauthorized: true,
-//       };
-//       console.log("最終的なSSL設定:", JSON.stringify(sslConfig));
-//       console.log("本番環境: SSL証明書を設定しました");
-//     } else {
-//       console.warn(
-//         "警告: SSL証明書ファイルが見つかりません。証明書検証をスキップします"
-//       );
-//     }
-//   } catch (error) {
-//     console.error("SSL証明書の読み込みに失敗しました:", error);
-//     console.warn(
-//       "警告: SSL接続でもエラー発生を防ぐため、証明書検証をスキップします"
-//     );
-//   }
-// } else {
-console.log("開発環境: SSL証明書の検証をスキップします");
-// }
+if (process.env.NODE_ENV === "production") {
+  // CA証明書パスの設定
+  console.log("証明書ファイルのパス:読み込み開始");
+  const caCertPath = path.join(__dirname, "../certs/ap-northeast-1-bundle.pem");
+  console.log("証明書ファイル存在確認:", fs.existsSync(caCertPath));
+  try {
+    // 証明書ファイルが存在するか確認
+    if (fs.existsSync(caCertPath)) {
+      const caCert = fs.readFileSync(caCertPath).toString();
+      sslConfig = {
+        ca: caCert,
+        rejectUnauthorized: true,
+      };
+      console.log("最終的なSSL設定:", JSON.stringify(sslConfig));
+      console.log("本番環境: SSL証明書を設定しました");
+    } else {
+      console.warn(
+        "警告: SSL証明書ファイルが見つかりません。証明書検証をスキップします"
+      );
+    }
+  } catch (error) {
+    console.error("SSL証明書の読み込みに失敗しました:", error);
+    console.warn(
+      "警告: SSL接続でもエラー発生を防ぐため、証明書検証をスキップします"
+    );
+  }
+} else {
+  console.log("開発環境: SSL証明書の検証をスキップします");
+}
 
 // データベース接続設定（基本設定）
 const dbConfig = {
