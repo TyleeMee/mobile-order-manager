@@ -29,9 +29,10 @@ if (process.env.NODE_ENV === "production") {
   try {
     // 証明書ファイルが存在するか確認
     if (fs.existsSync(caCertPath)) {
-      const caCert = fs.readFileSync(caCertPath).toString();
+      // const caCert = fs.readFileSync(caCertPath).toString();
+      const sslCert = fs.readFileSync(caCertPath).toString();
       sslConfig = {
-        ca: caCert,
+        ca: sslCert,
         rejectUnauthorized: true,
       };
       console.log("最終的なSSL設定:", JSON.stringify(sslConfig));
