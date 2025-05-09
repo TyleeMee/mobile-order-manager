@@ -96,8 +96,9 @@ app.use((req, res) => {
 });
 
 // サーバー起動
-app.listen(PORT, () => {
-  console.log(`サーバーがポート ${PORT} で起動しました`);
+//Express.jsアプリケーションを明示的にIPv4インターフェースでリッスンするように第2引数を"0.0.0.0",に
+app.listen(PORT as number, "0.0.0.0", () => {
+  console.log(`サーバーがポート ${PORT} で起動しました（IPv4）`);
 });
 
 export default app;
