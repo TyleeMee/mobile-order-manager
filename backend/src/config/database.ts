@@ -9,7 +9,10 @@ import path from "path";
 dotenv.config();
 
 // SSL設定（環境に応じて動的に設定）
-let sslConfig: any = { rejectUnauthorized: false }; // 開発環境のデフォルト
+let sslConfig: any = {
+  rejectUnauthorized: false, // SSL証明書の検証をスキップ
+  ssl: true, // SSL接続を要求
+};
 
 //TODO エラー発生するので、暫定的にスキップするが、後で以下のコードを有効化
 // TODO: 優先度: 中 - SSL証明書検証の有効化
