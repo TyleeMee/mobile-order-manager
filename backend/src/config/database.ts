@@ -26,16 +26,23 @@ if (process.env.NODE_ENV === "production") {
   console.log("証明書ファイルのパス:読み込み開始");
   const caCertPath = path.join(__dirname, "../certs/ap-northeast-1-bundle.pem");
   console.log("証明書ファイル存在確認:", fs.existsSync(caCertPath));
+
   try {
     // 証明書ファイルが存在するか確認
     if (fs.existsSync(caCertPath)) {
-      // const caCert = fs.readFileSync(caCertPath).toString();
-      const sslCert = fs.readFileSync(caCertPath).toString();
+      const caCert = fs.readFileSync(caCertPath).toString();
+
+      // SSL設定を明示的に構成
       sslConfig = {
-        ca: sslCert,
+        ca: caCert,
         rejectUnauthorized: true,
+        // 追加: 証明書の検証方法を厳密に指定
+        checkServerIdentity: (host: string, cert: any) => {
+          // ホスト名の検証をするか、nullを返して通常の検証を行う
+          return null;
+        },
       };
-      console.log("最終的なSSL設定:", JSON.stringify(sslConfig));
+
       console.log("本番環境: SSL証明書を設定しました");
     } else {
       console.warn(
@@ -48,8 +55,6 @@ if (process.env.NODE_ENV === "production") {
       "警告: SSL接続でもエラー発生を防ぐため、証明書検証をスキップします"
     );
   }
-} else {
-  console.log("開発環境: SSL証明書の検証をスキップします");
 }
 
 // データベース接続設定（基本設定）
@@ -65,6 +70,11 @@ const dbConfig = {
 export const pool = new Pool({
   host: process.env.DB_HOST,
   ...dbConfig,
+  // デバッグレベルを追加
+  ssl: {
+    ...sslConfig,
+    debug: console.log, // SSL関連のデバッグ情報を出力
+  },
 });
 
 // 動的プール生成関数

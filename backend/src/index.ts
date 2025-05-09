@@ -1,3 +1,7 @@
+//TODO デバッグ不要になったら削除
+//pg関連のモジュールがロードされる前にデバッグモードが有効になる
+process.env.DEBUG = "pg*";
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
