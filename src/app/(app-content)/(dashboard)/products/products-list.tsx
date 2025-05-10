@@ -238,6 +238,12 @@ export default function ProductsList({ categories, loading = false }: Props) {
                                             width: "40px",
                                             height: "40px",
                                           }}
+                                          onError={(e) => {
+                                            console.error(
+                                              "画像読み込みエラー:",
+                                              product.imageUrl
+                                            );
+                                          }}
                                         />
                                       </div>
                                       <div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getImagesFromS3Folder } from "@/lib/s3-utils";
 
 // 静的ページ生成のためのデータフェッチ
-//TODO 画像取得・表示ロジックを完成させる　できればSSRで
+//TODO 画像取得・表示ロジックを完成させる　できればSSGで
 async function getHomeImage() {
   // 'home/' はS3バケット内のフォルダパス
   const imageData = await getImagesFromS3Folder("home/");
