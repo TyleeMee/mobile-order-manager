@@ -4,16 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getImagesFromS3Folder } from "@/lib/s3-utils";
 
-// ISR設定 - 1時間(3600秒)ごとに再検証
-// S3の署名付きURLの有効期限が3600秒のため、その前にページを再生成する
-export const revalidate = 3000; // 50分ごとに再検証
-
 // 静的ページ生成のためのデータフェッチ
 //TODO 画像取得・表示ロジックを完成させる　できればSSRで
 async function getHomeImage() {
   // 'home/' はS3バケット内のフォルダパス
   const imageData = await getImagesFromS3Folder("home/");
-  console.log("ISRでホーム画像を再取得しました:", new Date().toISOString());
   return imageData.length > 0 ? imageData[0] : null;
 }
 

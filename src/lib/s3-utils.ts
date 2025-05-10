@@ -1,4 +1,3 @@
-// lib/aws/s3-utils.ts
 import { fromIni } from "@aws-sdk/credential-providers";
 import {
   S3Client,
@@ -54,6 +53,13 @@ const getS3ClientConfig = () => {
 // S3クライアントの設定
 export const s3Client = new S3Client(getS3ClientConfig());
 
+// S3のパブリックURLを生成する関数
+const getPublicS3Url = (key: string): string => {
+  const bucketName = process.env.S3_BUCKET_NAME || "";
+  const region = process.env.REGION || "ap-northeast-1";
+  return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
+};
+
 /**
  * 指定されたS3バケットとフォルダパスから画像を取得する
  * @param {string} folderPath - S3バケット内のフォルダパス (例: "home/")
@@ -93,40 +99,25 @@ export async function getImagesFromS3Folder(
       );
     });
 
-    // ISRでの再検証のために、URLの生成時刻をログに記録
-    console.log(`署名付きURL生成時刻: ${new Date().toISOString()}`);
+    // 各画像ファイルのパブリックURLを生成
+    const imageData = imageFiles.map((file: _Object) => {
+      if (!file.Key) {
+        throw new Error("ファイルキーが見つかりません");
+      }
 
-    // 各画像ファイルのURLを生成
-    const imageData = await Promise.all(
-      imageFiles.map(async (file: _Object) => {
-        if (!file.Key) {
-          throw new Error("ファイルキーが見つかりません");
-        }
+      // パブリックURLの生成
+      const url = getPublicS3Url(file.Key);
 
-        // 署名付きURLの有効期限を6時間に延長 (ISRの再検証よりも十分長く)
-        const expiresIn = 6 * 60 * 60; // 6時間
+      const imageData: ImageData = {
+        name: file.Key.split("/").pop() || "",
+        key: file.Key,
+        url: url,
+        lastModified: file.LastModified,
+        imagePath: file.Key,
+      };
 
-        // 署名付きURLを生成（有効期限は1時間）
-        const command = new GetObjectCommand({
-          Bucket: process.env.S3_BUCKET_NAME || "",
-          Key: file.Key,
-        });
-
-        const url = await getSignedUrl(s3Client, command, {
-          expiresIn: expiresIn,
-        });
-
-        const imageData: ImageData = {
-          name: file.Key.split("/").pop() || "",
-          key: file.Key,
-          url: url,
-          lastModified: file.LastModified,
-          imagePath: file.Key,
-        };
-
-        return imageData;
-      })
-    );
+      return imageData;
+    });
 
     console.log(
       `${folderPath} から ${imageData.length} 個の画像を取得しました`

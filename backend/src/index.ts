@@ -24,21 +24,6 @@ const PORT = process.env.PORT || 5001;
 
 // ミドルウェアの設定
 app.use(cors());
-//TODO 250508に下記に変更、ダメなら上記に戻す。
-// CORSの設定 - 全てのオリジンを許可
-// app.use(
-//   cors({
-//     //TODO  本番環境では '*' は避けるべき
-//     origin:
-//       process.env.NODE_ENV === "development"
-//         ? "*" // 開発環境（フロントエンドのURL）
-//         : "*", // 本番環境
-
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     credentials: true,
-//   })
-// );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
