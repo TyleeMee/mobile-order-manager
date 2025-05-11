@@ -54,6 +54,7 @@ export const uploadImageToS3 = async (
     });
 
     const timestamp = Date.now();
+
     const filename = `${userId}/${timestamp}_${Buffer.from(
       file.originalname,
       "utf8"
