@@ -75,6 +75,7 @@ export const uploadImageToS3 = async (
       Body: file.buffer,
       ContentType: file.mimetype,
       ContentLength: file.buffer.length,
+      ContentEncoding: "binary",
     };
 
     const uploadCommand = new PutObjectCommand(uploadParams);
