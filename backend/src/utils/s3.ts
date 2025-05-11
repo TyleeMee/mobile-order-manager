@@ -54,10 +54,10 @@ export const uploadImageToS3 = async (
     });
 
     const timestamp = Date.now();
-    const filename = `${userId}/${timestamp}_${file.originalname.replace(
-      /\s/g,
-      "_"
-    )}`;
+    const filename = `${userId}/${timestamp}_${Buffer.from(
+      file.originalname,
+      "utf8"
+    ).toString("hex")}`;
     const s3Path = `${folderPath}/${filename}`;
 
     // バッファを明示的に確認
