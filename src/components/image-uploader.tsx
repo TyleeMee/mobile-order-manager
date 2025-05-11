@@ -72,7 +72,6 @@ const ImageUploader = <T extends Record<string, unknown>>({
             fill
             sizes="208px"
             className="object-cover"
-            unoptimized={true}
             onError={(e) => {
               console.error("画像読み込みエラー:", imagePreview);
             }}

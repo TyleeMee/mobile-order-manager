@@ -4,6 +4,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 
 // 環境に応じたS3クライアント設定を取得する関数
@@ -36,21 +37,22 @@ const getS3ClientConfig = () => {
 // S3クライアントの設定
 export const s3Client = new S3Client(getS3ClientConfig());
 
-// S3に画像をアップロードする共通関数
+// s3.ts の uploadImageToS3 関数を修正
 export const uploadImageToS3 = async (
   file: Express.Multer.File,
   userId: string,
-  folderPath: string // 例: "products" または "shops"
+  folderPath: string
 ): Promise<{ imageUrl: string; imagePath: string }> => {
   try {
     console.log("S3アップロード開始:", {
       バケット名: process.env.S3_BUCKET_NAME,
       リージョン: process.env.REGION,
       ファイル名: file.originalname,
+      ファイルサイズ: file.size, // サイズをログに追加
       ユーザーID: userId,
       フォルダパス: folderPath,
     });
-    //
+
     const timestamp = Date.now();
     const filename = `${userId}/${timestamp}_${file.originalname.replace(
       /\s/g,
@@ -58,19 +60,44 @@ export const uploadImageToS3 = async (
     )}`;
     const s3Path = `${folderPath}/${filename}`;
 
-    // S3にアップロード
+    // バッファを明示的に確認
+    if (!file.buffer || file.buffer.length === 0) {
+      throw new Error("ファイルバッファが空または無効です");
+    }
+
+    console.log(`ファイルバッファサイズ: ${file.buffer.length} bytes`);
+
+    // S3にアップロード（Content-Lengthを明示的に指定）
     const uploadParams = {
       Bucket: process.env.S3_BUCKET_NAME || "",
       Key: s3Path,
       Body: file.buffer,
       ContentType: file.mimetype,
+      ContentLength: file.buffer.length,
     };
 
     const uploadCommand = new PutObjectCommand(uploadParams);
-    await s3Client.send(uploadCommand);
+    const result = await s3Client.send(uploadCommand);
+
+    console.log("S3アップロード結果:", result);
+
+    // アップロード後に確認
+    try {
+      const headCommand = new HeadObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME || "",
+        Key: s3Path,
+      });
+      const headResult = await s3Client.send(headCommand);
+      console.log("アップロード確認結果:", {
+        ContentLength: headResult.ContentLength,
+        ContentType: headResult.ContentType,
+        ETag: headResult.ETag,
+      });
+    } catch (headErr) {
+      console.warn("アップロード確認エラー:", headErr);
+    }
 
     // 公開URLを返す
-    // TODO（バケットの設定によって変わる可能性あり 特にCloudFront使用時）
     const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/${s3Path}`;
 
     return {
