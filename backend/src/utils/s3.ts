@@ -6,6 +6,8 @@ import {
   DeleteObjectCommand,
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
+import fs from "fs";
+import path from "path";
 
 // 環境に応じたS3クライアント設定を取得する関数
 const getS3ClientConfig = () => {
@@ -75,7 +77,6 @@ export const uploadImageToS3 = async (
       Body: file.buffer,
       ContentType: file.mimetype,
       ContentLength: file.buffer.length,
-      ContentEncoding: "binary",
     };
 
     const uploadCommand = new PutObjectCommand(uploadParams);
@@ -105,6 +106,95 @@ export const uploadImageToS3 = async (
     return {
       imageUrl,
       imagePath: s3Path,
+    };
+  } catch (error) {
+    console.error("S3への画像アップロードに失敗:", error);
+    throw new Error("画像のアップロードに失敗しました");
+  }
+};
+
+export const uploadFileToS3 = async (
+  filePath: string,
+  originalName: string,
+  contentType: string,
+  userId: string,
+  folderPath: string
+): Promise<{ imageUrl: string; imagePath: string }> => {
+  try {
+    console.log("ファイルパスからS3アップロード開始:", {
+      ファイルパス: filePath,
+      ファイル名: originalName,
+      ContentType: contentType,
+      ユーザーID: userId,
+      フォルダパス: folderPath,
+    });
+
+    // ファイルが存在することを確認
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`ファイルが存在しません: ${filePath}`);
+    }
+
+    // ファイルの読み込み
+    const fileContent = fs.readFileSync(filePath);
+    const fileSize = fs.statSync(filePath).size;
+
+    console.log(`ファイルサイズ: ${fileSize} bytes`);
+
+    // S3のキーを生成
+    const timestamp = Date.now();
+    const safeFileName = originalName.replace(/\s/g, "_");
+    const s3Key = `${folderPath}/${userId}/${timestamp}_${safeFileName}`;
+
+    // S3にアップロード
+    const uploadParams = {
+      Bucket: process.env.S3_BUCKET_NAME || "",
+      Key: s3Key,
+      Body: fileContent,
+      ContentType: contentType,
+    };
+
+    const uploadCommand = new PutObjectCommand(uploadParams);
+    const result = await s3Client.send(uploadCommand);
+
+    console.log("S3アップロード結果:", result);
+
+    // アップロード後の検証
+    try {
+      const headCommand = new HeadObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME || "",
+        Key: s3Key,
+      });
+      const headResult = await s3Client.send(headCommand);
+      console.log("アップロード確認結果:", {
+        ContentLength: headResult.ContentLength,
+        ContentType: headResult.ContentType,
+        ETag: headResult.ETag,
+      });
+
+      // アップロードしたファイルのサイズを元のファイルと比較
+      if (headResult.ContentLength !== fileSize) {
+        console.error(
+          `警告: アップロードファイルサイズの不一致 - 元: ${fileSize}, S3: ${headResult.ContentLength}`
+        );
+      }
+    } catch (headErr) {
+      console.warn("アップロード確認エラー:", headErr);
+    }
+
+    // 一時ファイルを削除
+    try {
+      fs.unlinkSync(filePath);
+      console.log(`一時ファイル削除: ${filePath}`);
+    } catch (unlinkErr) {
+      console.warn(`一時ファイル削除エラー: ${unlinkErr}`);
+    }
+
+    // URLを生成して返す
+    const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/${s3Key}`;
+
+    return {
+      imageUrl,
+      imagePath: s3Key,
     };
   } catch (error) {
     console.error("S3への画像アップロードに失敗:", error);

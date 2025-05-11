@@ -6,10 +6,26 @@ import {
   updateShopWithImage,
 } from "../services/shopService";
 import { fetchShop } from "../repositories/shopRepository";
+import fs from "fs";
 
-// Multerの設定（一時ファイル保存用）
+// multerの設定（ディスクストレージ使用）
+//メモリバッファを使用する方法ではなく、一時的にファイルをディスクに保存してからS3にアップロードする方法に切り替え250511
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      // EC2上の一時ディレクトリを使用
+      const tempDir = "/tmp/uploads";
+      // ディレクトリが存在しない場合は作成
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      cb(null, tempDir);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(null, uniqueSuffix + "-" + file.originalname.replace(/\s/g, "_"));
+    },
+  }),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB制限
   },

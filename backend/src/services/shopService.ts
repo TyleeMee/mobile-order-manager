@@ -1,4 +1,5 @@
-import { deleteImageFromS3, uploadImageToS3 } from "@/utils/s3";
+import fs from "fs";
+import { deleteImageFromS3, uploadFileToS3 } from "@/utils/s3";
 import { ShopData } from "../models/Shop";
 import { addShop, updateShop } from "../repositories/shopRepository";
 import { formatZodError, shopSchema } from "../validation/shopSchema";
@@ -27,15 +28,40 @@ export const createShopWithImage = async (
     }
 
     // 新しい画像ファイルがある場合は処理
+    // 新しい画像ファイルがある場合は処理
     if (imageFile) {
       try {
-        const { imageUrl, imagePath } = await uploadImageToS3(
-          imageFile,
+        // ファイルの存在を確認
+        const fileStat = fs.statSync(imageFile.path);
+        console.log(
+          `アップロードするファイル: ${imageFile.path}, サイズ: ${fileStat.size}バイト`
+        );
+
+        // JPEGファイルの検証（オプション）
+        if (imageFile.mimetype === "image/jpeg") {
+          const header = Buffer.alloc(2);
+          const fd = fs.openSync(imageFile.path, "r");
+          fs.readSync(fd, header, 0, 2, 0);
+          fs.closeSync(fd);
+
+          if (header[0] !== 0xff || header[1] !== 0xd8) {
+            console.error("⚠️ 警告: 無効なJPEGシグネチャです");
+          } else {
+            console.log("✓ 有効なJPEGシグネチャを確認しました");
+          }
+        }
+
+        // S3にアップロード
+        const result = await uploadFileToS3(
+          imageFile.path,
+          imageFile.originalname,
+          imageFile.mimetype,
           userId,
           "shops"
         );
-        shopData.imageUrl = imageUrl;
-        shopData.imagePath = imagePath;
+
+        shopData.imageUrl = result.imageUrl;
+        shopData.imagePath = result.imagePath;
       } catch (error) {
         return {
           error: true,
@@ -82,16 +108,40 @@ export const updateShopWithImage = async (
     // 新しい画像ファイルがある場合は処理
     if (imageFile) {
       try {
-        const { imageUrl, imagePath } = await uploadImageToS3(
-          imageFile,
+        // ファイルの存在を確認
+        const fileStat = fs.statSync(imageFile.path);
+        console.log(
+          `更新用アップロードファイル: ${imageFile.path}, サイズ: ${fileStat.size}バイト`
+        );
+
+        // JPEGファイルの検証（オプション）
+        if (imageFile.mimetype === "image/jpeg") {
+          const header = Buffer.alloc(2);
+          const fd = fs.openSync(imageFile.path, "r");
+          fs.readSync(fd, header, 0, 2, 0);
+          fs.closeSync(fd);
+
+          if (header[0] !== 0xff || header[1] !== 0xd8) {
+            console.error("⚠️ 警告: 無効なJPEGシグネチャです");
+          } else {
+            console.log("✓ 有効なJPEGシグネチャを確認しました");
+          }
+        }
+
+        // S3にアップロード
+        const result = await uploadFileToS3(
+          imageFile.path,
+          imageFile.originalname,
+          imageFile.mimetype,
           userId,
           "shops"
         );
-        shopData.imageUrl = imageUrl;
-        shopData.imagePath = imagePath;
+
+        shopData.imageUrl = result.imageUrl;
+        shopData.imagePath = result.imagePath;
 
         // 古い画像が存在する場合は削除
-        if (oldImagePath && oldImagePath !== imagePath) {
+        if (oldImagePath && oldImagePath !== result.imagePath) {
           await deleteImageFromS3(oldImagePath);
         }
       } catch (error) {
