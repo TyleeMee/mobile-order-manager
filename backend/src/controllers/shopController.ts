@@ -9,12 +9,22 @@ import { fetchShop } from "../repositories/shopRepository";
 import fs from "fs";
 import path from "path";
 
-// ファイルの検証関数を追加
+// =================================================================
+// ===== 追加: 画像ファイル検証関数 (2025/05/13) ===================
+// =================================================================
+/**
+ * 画像ファイルの形式を検証する関数
+ * @param filePath ファイルパス
+ * @param mimetype ファイルのMIMEタイプ
+ * @returns 検証結果と関連メッセージ
+ */
 const validateImageFile = (
   filePath: string,
   mimetype: string
 ): { isValid: boolean; message: string } => {
   try {
+    console.log(`[検証開始] ファイル: ${filePath}, タイプ: ${mimetype}`);
+
     // ファイルが存在するか確認
     if (!fs.existsSync(filePath)) {
       return { isValid: false, message: `ファイルが存在しません: ${filePath}` };
@@ -22,7 +32,7 @@ const validateImageFile = (
 
     // ファイルサイズを確認
     const stats = fs.statSync(filePath);
-    console.log(`ファイルサイズ: ${stats.size}バイト`);
+    console.log(`[検証] ファイルサイズ: ${stats.size}バイト`);
 
     if (stats.size === 0) {
       return {
@@ -37,33 +47,50 @@ const validateImageFile = (
     fs.readSync(fd, buffer, 0, 16, 0);
     fs.closeSync(fd);
 
-    console.log(
-      "受信ファイルのヘッダー:",
-      buffer.toString("hex").match(/../g)?.join(" ")
-    );
+    const headerHex = buffer.toString("hex").match(/../g)?.join(" ") || "";
+    console.log(`[検証] 受信ファイルのヘッダー: ${headerHex}`);
 
     if (mimetype === "image/jpeg") {
       const isValidJpeg = buffer[0] === 0xff && buffer[1] === 0xd8;
-      console.log("JPEGシグネチャチェック:", isValidJpeg ? "有効" : "無効");
+      console.log(
+        `[検証] JPEGシグネチャチェック: ${isValidJpeg ? "✓有効" : "✗無効"}`
+      );
 
       if (!isValidJpeg) {
-        return { isValid: false, message: "無効なJPEG画像です" };
+        console.error(
+          `[検証エラー] JPEGシグネチャが無効です: ${buffer[0]
+            .toString(16)
+            .padStart(2, "0")} ${buffer[1]
+            .toString(16)
+            .padStart(2, "0")} ≠ FF D8`
+        );
+        return {
+          isValid: false,
+          message: "無効なJPEG画像です - ファイルシグネチャが正しくありません",
+        };
       }
     }
 
     if (mimetype === "image/png") {
       const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
       const isValidPng = pngSignature.every((byte, i) => buffer[i] === byte);
-      console.log("PNGシグネチャチェック:", isValidPng ? "有効" : "無効");
+      console.log(
+        `[検証] PNGシグネチャチェック: ${isValidPng ? "✓有効" : "✗無効"}`
+      );
 
       if (!isValidPng) {
-        return { isValid: false, message: "無効なPNG画像です" };
+        console.error(`[検証エラー] PNGシグネチャが無効です`);
+        return {
+          isValid: false,
+          message: "無効なPNG画像です - ファイルシグネチャが正しくありません",
+        };
       }
     }
 
+    console.log(`[検証成功] ファイル形式検証に合格しました: ${filePath}`);
     return { isValid: true, message: "有効な画像ファイルです" };
   } catch (error) {
-    console.error("ファイル検証エラー:", error);
+    console.error("[検証エラー] ファイル検証中に例外が発生:", error);
     return {
       isValid: false,
       message: `検証中にエラーが発生しました: ${
@@ -73,7 +100,10 @@ const validateImageFile = (
   }
 };
 
-// multerの設定見直し
+// =================================================================
+// ===== 修正: multerの設定見直し (2025/05/13) =====================
+// =================================================================
+// 変更点: ファイル名サニタイズの追加、エラー処理の強化
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // EC2上の一時ディレクトリを使用
@@ -82,17 +112,23 @@ const storage = multer.diskStorage({
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
+    console.log(`[multer] アップロードディレクトリ: ${tempDir}`);
     cb(null, tempDir);
   },
   filename: function (req, file, cb) {
-    // ファイル名をサニタイズ
-    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+    // 追加: ファイル名をサニタイズ - 特殊文字を除去
+    const originalName = file.originalname;
+    const sanitizedName = originalName.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + sanitizedName);
+    const fileName = uniqueSuffix + "-" + sanitizedName;
+    console.log(
+      `[multer] 元のファイル名: ${originalName} → 変換後: ${fileName}`
+    );
+    cb(null, fileName);
   },
 });
 
-// ファイルタイプとサイズの検証
+// 追加: ファイルタイプとサイズのフィルタリング関数
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
@@ -100,14 +136,15 @@ const fileFilter = (
 ) => {
   // ファイルタイプをチェック
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    console.log(`ファイルタイプ検証OK: ${file.mimetype}`);
+    console.log(`[multer] ファイルタイプ検証OK: ${file.mimetype}`);
     cb(null, true);
   } else {
-    console.error(`拒否されたファイルタイプ: ${file.mimetype}`);
+    console.error(`[multer] 拒否されたファイルタイプ: ${file.mimetype}`);
     cb(new Error("許可されていないファイル形式です (JPEG/PNG のみ許可)"));
   }
 };
 
+// 修正: より詳細な設定を適用したmulter設定
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
@@ -116,11 +153,18 @@ const upload = multer({
   },
 });
 
-// ショップの新規作成（マルチパートフォームデータ対応）
+// =================================================================
+// ===== 修正: ショップの新規作成ハンドラー (2025/05/13) ===========
+// =================================================================
 export const createShopHandler = async (req: Request, res: Response) => {
+  console.log("[CREATE] ショップ作成リクエスト受信");
+
   // multerミドルウェアを使用して画像ファイルを処理
   upload.single("imageFile")(req, res, async (err) => {
     if (err) {
+      console.error(
+        `[CREATE エラー] ファイルアップロードエラー: ${err.message}`
+      );
       return res
         .status(400)
         .json({ message: "ファイルアップロードエラー: " + err.message });
@@ -129,30 +173,37 @@ export const createShopHandler = async (req: Request, res: Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
+        console.error("[CREATE エラー] 認証されていません");
         return res.status(401).json({ message: "認証されていません" });
       }
+      console.log(`[CREATE] ユーザーID: ${userId}`);
 
       // デバッグ情報を出力
-      console.log("リクエスト本文:", req.body);
+      console.log("[CREATE] リクエスト本文:", req.body);
+
+      // 追加: アップロードされたファイルの詳細な情報をログに出力
       if (req.file) {
-        console.log("ファイル情報:", {
+        console.log("[CREATE] ファイル情報:", {
           originalname: req.file.originalname,
           mimetype: req.file.mimetype,
           size: req.file.size,
           path: req.file.path,
+          filename: req.file.filename,
         });
 
-        // ファイルの検証
+        // 追加: ファイルの検証プロセス
         const validation = validateImageFile(req.file.path, req.file.mimetype);
         if (!validation.isValid) {
-          console.error("画像検証エラー:", validation.message);
+          console.error(`[CREATE エラー] 画像検証失敗: ${validation.message}`);
 
           // 一時ファイルを削除
           try {
             fs.unlinkSync(req.file.path);
-            console.log(`無効なファイルを削除しました: ${req.file.path}`);
+            console.log(
+              `[CREATE] 無効なファイルを削除しました: ${req.file.path}`
+            );
           } catch (unlinkErr) {
-            console.warn(`一時ファイル削除エラー: ${unlinkErr}`);
+            console.warn(`[CREATE 警告] 一時ファイル削除エラー: ${unlinkErr}`);
           }
 
           return res.status(400).json({
@@ -161,9 +212,12 @@ export const createShopHandler = async (req: Request, res: Response) => {
           });
         }
 
-        console.log("画像検証成功:", validation.message);
+        // 追加: 検証成功ログ
+        console.log(`[CREATE 成功] 画像検証成功: ${validation.message}`);
       } else {
-        console.log("ファイルなし - 画像のアップロードはスキップされます");
+        console.log(
+          "[CREATE] ファイルなし - 画像のアップロードはスキップされます"
+        );
       }
 
       // フォームデータを取得
@@ -180,23 +234,29 @@ export const createShopHandler = async (req: Request, res: Response) => {
         imagePath: req.body.imagePath || "",
       };
 
-      console.log("作成するショップデータ:", shopData);
+      console.log("[CREATE] 作成するショップデータ:", shopData);
 
       // サービス層を呼び出し
+      console.log("[CREATE] サービス層を呼び出し中...");
       const result = await createShopWithImage(userId, shopData, req.file);
 
-      console.log("サービス層の結果:", result);
+      console.log("[CREATE] サービス層の結果:", result);
 
       if ("error" in result) {
+        console.error(`[CREATE エラー] サービス層でエラー: ${result.message}`);
         return res.status(400).json({
           message: result.message,
           error: true,
         });
       }
 
+      // 追加: 成功ログ
+      console.log(
+        `[CREATE 成功] ショップが正常に作成されました! ID: ${result.id}`
+      );
       return res.status(201).json({ id: result.id });
     } catch (error) {
-      console.error("ショップ作成エラー:", error);
+      console.error("[CREATE エラー] ショップ作成エラー:", error);
       return res.status(500).json({
         message:
           error instanceof Error
@@ -207,7 +267,7 @@ export const createShopHandler = async (req: Request, res: Response) => {
   });
 };
 
-// ショップの取得
+// ショップの取得 - 変更なし
 export const getShopHandler = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -231,10 +291,17 @@ export const getShopHandler = async (req: Request, res: Response) => {
   }
 };
 
-// ショップの更新（マルチパートフォームデータ対応）
+// =================================================================
+// ===== 修正: ショップの更新ハンドラー (2025/05/13) ===============
+// =================================================================
 export const editShopHandler = async (req: Request, res: Response) => {
+  console.log("[UPDATE] ショップ更新リクエスト受信");
+
   upload.single("imageFile")(req, res, async (err) => {
     if (err) {
+      console.error(
+        `[UPDATE エラー] ファイルアップロードエラー: ${err.message}`
+      );
       return res
         .status(400)
         .json({ message: "ファイルアップロードエラー: " + err.message });
@@ -243,30 +310,39 @@ export const editShopHandler = async (req: Request, res: Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
+        console.error("[UPDATE エラー] 認証されていません");
         return res.status(401).json({ message: "認証されていません" });
       }
+      console.log(`[UPDATE] ユーザーID: ${userId}`);
 
       // デバッグ情報を出力
-      console.log("更新リクエスト本文:", req.body);
+      console.log("[UPDATE] 更新リクエスト本文:", req.body);
+
+      // 追加: アップロードされたファイルの詳細情報
       if (req.file) {
-        console.log("更新ファイル情報:", {
+        console.log("[UPDATE] 更新ファイル情報:", {
           originalname: req.file.originalname,
           mimetype: req.file.mimetype,
           size: req.file.size,
           path: req.file.path,
+          filename: req.file.filename,
         });
 
-        // ファイルの検証
+        // 追加: ファイル検証プロセス
         const validation = validateImageFile(req.file.path, req.file.mimetype);
         if (!validation.isValid) {
-          console.error("更新画像検証エラー:", validation.message);
+          console.error(
+            `[UPDATE エラー] 更新画像検証失敗: ${validation.message}`
+          );
 
           // 一時ファイルを削除
           try {
             fs.unlinkSync(req.file.path);
-            console.log(`無効なファイルを削除しました: ${req.file.path}`);
+            console.log(
+              `[UPDATE] 無効なファイルを削除しました: ${req.file.path}`
+            );
           } catch (unlinkErr) {
-            console.warn(`一時ファイル削除エラー: ${unlinkErr}`);
+            console.warn(`[UPDATE 警告] 一時ファイル削除エラー: ${unlinkErr}`);
           }
 
           return res.status(400).json({
@@ -275,9 +351,10 @@ export const editShopHandler = async (req: Request, res: Response) => {
           });
         }
 
-        console.log("更新画像検証成功:", validation.message);
+        // 追加: 検証成功ログ
+        console.log(`[UPDATE 成功] 更新画像検証成功: ${validation.message}`);
       } else {
-        console.log("更新ファイルなし - 画像の更新はスキップされます");
+        console.log("[UPDATE] 更新ファイルなし - 画像の更新はスキップされます");
       }
 
       // フォームデータを取得
@@ -301,9 +378,10 @@ export const editShopHandler = async (req: Request, res: Response) => {
         }
       });
 
-      console.log("更新するショップデータ:", shopData);
+      console.log("[UPDATE] 更新するショップデータ:", shopData);
 
       // サービス層を呼び出し
+      console.log("[UPDATE] サービス層を呼び出し中...");
       const result = await updateShopWithImage(
         userId,
         shopData,
@@ -311,20 +389,23 @@ export const editShopHandler = async (req: Request, res: Response) => {
         req.body.oldImagePath
       );
 
-      console.log("更新結果:", result);
+      console.log("[UPDATE] 更新結果:", result);
 
       if (!result.success) {
+        console.error(`[UPDATE エラー] サービス層でエラー: ${result.message}`);
         return res.status(400).json({
           message: result.message,
           error: true,
         });
       }
 
+      // 追加: 成功ログ
+      console.log(`[UPDATE 成功] ショップ情報が正常に更新されました!`);
       return res
         .status(200)
         .json({ message: "店舗情報が正常に更新されました" });
     } catch (error) {
-      console.error("ショップ更新エラー:", error);
+      console.error("[UPDATE エラー] ショップ更新エラー:", error);
       return res.status(500).json({
         message:
           error instanceof Error
