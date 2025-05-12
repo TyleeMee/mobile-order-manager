@@ -47,6 +47,8 @@ const ImageUploader = <T extends Record<string, unknown>>({
 
         const view = new Uint8Array(e.target.result as ArrayBuffer);
 
+        console.log("画像データ：", view);
+
         // JPEGシグネチャのチェック (FF D8)
         if (
           file.type === "image/jpeg" &&
