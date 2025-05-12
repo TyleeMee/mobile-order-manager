@@ -92,6 +92,8 @@ export default function ShopForm({
       // フォームの値をFormDataに追加
       const formValues = form.getValues();
 
+      console.log("フォーム値:", formValues);
+
       Object.entries(formValues).forEach(([key, value]) => {
         // _hasImageFileと内部フィールドはスキップ
         if (key === "_hasImageFile" || key.startsWith("_")) {
@@ -113,22 +115,102 @@ export default function ShopForm({
 
       // 画像ファイルがある場合
       if (imageFile) {
+        // 詳細な画像ファイル情報をログに出力
+        console.log("画像ファイル情報:", {
+          name: imageFile.name,
+          type: imageFile.type,
+          size: imageFile.size,
+          lastModified: new Date(imageFile.lastModified).toISOString(),
+        });
+
+        // 画像の先頭バイトを検証するための処理
+        await new Promise<void>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            if (e.target && e.target.result) {
+              const view = new Uint8Array(e.target.result as ArrayBuffer);
+
+              // 先頭16バイトを16進数で表示
+              const headerBytes = Array.from(view.slice(0, 16))
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join(" ");
+              console.log(`フォーム送信直前の画像ヘッダー: ${headerBytes}`);
+
+              // JPEGシグネチャの検証
+              if (imageFile.type === "image/jpeg") {
+                const isValidJpeg = view[0] === 0xff && view[1] === 0xd8;
+                console.log(`有効なJPEGシグネチャ: ${isValidJpeg}`);
+
+                if (!isValidJpeg) {
+                  console.error(
+                    "警告: JPEGファイルが無効なシグネチャを持っています"
+                  );
+                }
+              }
+
+              // PNGシグネチャの検証
+              if (imageFile.type === "image/png") {
+                const pngSignature = [
+                  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+                ];
+                const isValidPng = pngSignature.every(
+                  (byte, i) => view[i] === byte
+                );
+                console.log(`有効なPNGシグネチャ: ${isValidPng}`);
+
+                if (!isValidPng) {
+                  console.error(
+                    "警告: PNGファイルが無効なシグネチャを持っています"
+                  );
+                }
+              }
+
+              resolve();
+            } else {
+              console.error("ファイルの読み込みに失敗しました");
+              resolve();
+            }
+          };
+
+          reader.onerror = function () {
+            console.error("ファイル読み込みエラー:", reader.error);
+            resolve();
+          };
+
+          // ファイルの先頭部分のみを読み込む
+          reader.readAsArrayBuffer(imageFile.slice(0, 16));
+        });
+
+        // FormDataに画像ファイルを追加
         formData.append("imageFile", imageFile);
 
         // 既存の画像がある場合は古いパスも送信
         if (combinedDefaultValues.imagePath) {
           formData.append("oldImagePath", combinedDefaultValues.imagePath);
         }
+      } else {
+        console.log("画像ファイルなし: 新しい画像はアップロードされません");
       }
-      //TODO以下のデバッグコードを削除
-      // FormDataの内容をログに出力
+
+      // FormDataの内容をデバッグログに出力
       console.log("FormData内容:");
       for (const [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
+        if (value instanceof File) {
+          console.log(
+            `${key}: [File] 名前=${value.name}, サイズ=${value.size}バイト, タイプ=${value.type}`
+          );
+        } else {
+          console.log(`${key}: ${value}`);
+        }
       }
-      //
+
+      // APIリクエスト開始をログに記録
+      console.log("API送信開始...");
+
       // フォーム送信（FormDataをそのまま渡す）
-      await handleSubmitAction(formData);
+      const result = await handleSubmitAction(formData);
+
+      console.log("API送信完了:", result);
     } catch (error) {
       console.error("フォーム送信エラー:", error);
 
