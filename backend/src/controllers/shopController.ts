@@ -171,6 +171,73 @@ export const createShopHandler = async (req: Request, res: Response) => {
     }
 
     try {
+      // ここに追加: ファイルパスの詳細な検証
+      if (req.file) {
+        console.log("[パス検証] アップロードファイル情報:", {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          path: req.file.path,
+          filename: req.file.filename,
+        });
+
+        // ファイルが実際に存在するか確認
+        try {
+          const fileStats = fs.statSync(req.file.path);
+          console.log("[パス検証] ファイルの統計情報:", {
+            size: fileStats.size,
+            isFile: fileStats.isFile(),
+            created: fileStats.birthtime,
+            modified: fileStats.mtime,
+            permissions: fileStats.mode.toString(8),
+          });
+
+          // ファイルサイズが0の場合は警告
+          if (fileStats.size === 0) {
+            console.error("[パス検証エラー] ファイルサイズが0です");
+          }
+
+          // ファイルの先頭バイトを読み取り
+          const header = Buffer.alloc(16);
+          const fd = fs.openSync(req.file.path, "r");
+          fs.readSync(fd, header, 0, 16, 0);
+          fs.closeSync(fd);
+
+          console.log(
+            "[パス検証] ファイルヘッダー (16バイト):",
+            header.toString("hex")
+          );
+
+          // JPEGの場合、マジックナンバーを確認
+          if (req.file.mimetype === "image/jpeg") {
+            const isValidJpeg = header[0] === 0xff && header[1] === 0xd8;
+            console.log(
+              `[パス検証] JPEGシグネチャ確認: ${
+                isValidJpeg ? "✓有効" : "✗無効"
+              }`
+            );
+          }
+
+          // PNGの場合
+          if (req.file.mimetype === "image/png") {
+            const pngSignature = [
+              0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+            ];
+            const isValidPng = pngSignature.every(
+              (byte, i) => header[i] === byte
+            );
+            console.log(
+              `[パス検証] PNGシグネチャ確認: ${isValidPng ? "✓有効" : "✗無効"}`
+            );
+          }
+        } catch (fsError) {
+          console.error("[パス検証エラー] ファイル読み込みエラー:", fsError);
+        }
+      } else {
+        console.log(
+          "[パス検証] req.fileが存在しません - ファイル未アップロード"
+        );
+      }
       const userId = req.user?.id;
       if (!userId) {
         console.error("[CREATE エラー] 認証されていません");
