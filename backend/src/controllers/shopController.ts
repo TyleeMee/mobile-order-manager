@@ -7,25 +7,110 @@ import {
 } from "../services/shopService";
 import { fetchShop } from "../repositories/shopRepository";
 import fs from "fs";
+import path from "path";
 
-// multerの設定（ディスクストレージ使用）
-//メモリバッファを使用する方法ではなく、一時的にファイルをディスクに保存してからS3にアップロードする方法に切り替え250511
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      // EC2上の一時ディレクトリを使用
-      const tempDir = "/tmp/uploads";
-      // ディレクトリが存在しない場合は作成
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
+// ファイルの検証関数を追加
+const validateImageFile = (
+  filePath: string,
+  mimetype: string
+): { isValid: boolean; message: string } => {
+  try {
+    // ファイルが存在するか確認
+    if (!fs.existsSync(filePath)) {
+      return { isValid: false, message: `ファイルが存在しません: ${filePath}` };
+    }
+
+    // ファイルサイズを確認
+    const stats = fs.statSync(filePath);
+    console.log(`ファイルサイズ: ${stats.size}バイト`);
+
+    if (stats.size === 0) {
+      return {
+        isValid: false,
+        message: "0バイトのファイルはアップロードできません",
+      };
+    }
+
+    // ファイルの先頭バイトを検査して画像形式を検証
+    const buffer = Buffer.alloc(16);
+    const fd = fs.openSync(filePath, "r");
+    fs.readSync(fd, buffer, 0, 16, 0);
+    fs.closeSync(fd);
+
+    console.log(
+      "受信ファイルのヘッダー:",
+      buffer.toString("hex").match(/../g)?.join(" ")
+    );
+
+    if (mimetype === "image/jpeg") {
+      const isValidJpeg = buffer[0] === 0xff && buffer[1] === 0xd8;
+      console.log("JPEGシグネチャチェック:", isValidJpeg ? "有効" : "無効");
+
+      if (!isValidJpeg) {
+        return { isValid: false, message: "無効なJPEG画像です" };
       }
-      cb(null, tempDir);
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, uniqueSuffix + "-" + file.originalname.replace(/\s/g, "_"));
-    },
-  }),
+    }
+
+    if (mimetype === "image/png") {
+      const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+      const isValidPng = pngSignature.every((byte, i) => buffer[i] === byte);
+      console.log("PNGシグネチャチェック:", isValidPng ? "有効" : "無効");
+
+      if (!isValidPng) {
+        return { isValid: false, message: "無効なPNG画像です" };
+      }
+    }
+
+    return { isValid: true, message: "有効な画像ファイルです" };
+  } catch (error) {
+    console.error("ファイル検証エラー:", error);
+    return {
+      isValid: false,
+      message: `検証中にエラーが発生しました: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+};
+
+// multerの設定見直し
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // EC2上の一時ディレクトリを使用
+    const tempDir = "/tmp/uploads";
+    // ディレクトリが存在しない場合は作成
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    cb(null, tempDir);
+  },
+  filename: function (req, file, cb) {
+    // ファイル名をサニタイズ
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + "-" + sanitizedName);
+  },
+});
+
+// ファイルタイプとサイズの検証
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  // ファイルタイプをチェック
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    console.log(`ファイルタイプ検証OK: ${file.mimetype}`);
+    cb(null, true);
+  } else {
+    console.error(`拒否されたファイルタイプ: ${file.mimetype}`);
+    cb(new Error("許可されていないファイル形式です (JPEG/PNG のみ許可)"));
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB制限
   },
@@ -49,7 +134,37 @@ export const createShopHandler = async (req: Request, res: Response) => {
 
       // デバッグ情報を出力
       console.log("リクエスト本文:", req.body);
-      console.log("ファイル情報:", req.file);
+      if (req.file) {
+        console.log("ファイル情報:", {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          path: req.file.path,
+        });
+
+        // ファイルの検証
+        const validation = validateImageFile(req.file.path, req.file.mimetype);
+        if (!validation.isValid) {
+          console.error("画像検証エラー:", validation.message);
+
+          // 一時ファイルを削除
+          try {
+            fs.unlinkSync(req.file.path);
+            console.log(`無効なファイルを削除しました: ${req.file.path}`);
+          } catch (unlinkErr) {
+            console.warn(`一時ファイル削除エラー: ${unlinkErr}`);
+          }
+
+          return res.status(400).json({
+            message: `画像ファイルが無効です: ${validation.message}`,
+            error: true,
+          });
+        }
+
+        console.log("画像検証成功:", validation.message);
+      } else {
+        console.log("ファイルなし - 画像のアップロードはスキップされます");
+      }
 
       // フォームデータを取得
       const shopData = {
@@ -131,6 +246,40 @@ export const editShopHandler = async (req: Request, res: Response) => {
         return res.status(401).json({ message: "認証されていません" });
       }
 
+      // デバッグ情報を出力
+      console.log("更新リクエスト本文:", req.body);
+      if (req.file) {
+        console.log("更新ファイル情報:", {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          path: req.file.path,
+        });
+
+        // ファイルの検証
+        const validation = validateImageFile(req.file.path, req.file.mimetype);
+        if (!validation.isValid) {
+          console.error("更新画像検証エラー:", validation.message);
+
+          // 一時ファイルを削除
+          try {
+            fs.unlinkSync(req.file.path);
+            console.log(`無効なファイルを削除しました: ${req.file.path}`);
+          } catch (unlinkErr) {
+            console.warn(`一時ファイル削除エラー: ${unlinkErr}`);
+          }
+
+          return res.status(400).json({
+            message: `画像ファイルが無効です: ${validation.message}`,
+            error: true,
+          });
+        }
+
+        console.log("更新画像検証成功:", validation.message);
+      } else {
+        console.log("更新ファイルなし - 画像の更新はスキップされます");
+      }
+
       // フォームデータを取得
       const shopData: Partial<ShopData> = {
         title: req.body.title,
@@ -152,6 +301,8 @@ export const editShopHandler = async (req: Request, res: Response) => {
         }
       });
 
+      console.log("更新するショップデータ:", shopData);
+
       // サービス層を呼び出し
       const result = await updateShopWithImage(
         userId,
@@ -159,6 +310,8 @@ export const editShopHandler = async (req: Request, res: Response) => {
         req.file,
         req.body.oldImagePath
       );
+
+      console.log("更新結果:", result);
 
       if (!result.success) {
         return res.status(400).json({
