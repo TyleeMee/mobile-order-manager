@@ -4,6 +4,7 @@ import { ImagePlus, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { Path, PathValue, UseFormReturn } from "react-hook-form";
+import { toast } from "@/hooks/use-toast";
 
 // ジェネリック型を使用して、どのスキーマでも使用できるようにする
 type ImageUploaderProps<T extends Record<string, unknown>> = {
@@ -33,26 +34,98 @@ const ImageUploader = <T extends Record<string, unknown>>({
     }
   }, [defaultImageUrl]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // validateImageFile 関数を追加250512
+  const validateImageFile = (file: File): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        if (!e.target || !e.target.result) {
+          reject(new Error("ファイルの読み込みに失敗しました"));
+          return;
+        }
+
+        const view = new Uint8Array(e.target.result as ArrayBuffer);
+
+        // JPEGシグネチャのチェック (FF D8)
+        if (
+          file.type === "image/jpeg" &&
+          (view[0] !== 0xff || view[1] !== 0xd8)
+        ) {
+          reject(new Error("無効なJPEG画像形式です"));
+          return;
+        }
+
+        // PNG形式のチェック (89 50 4E 47 0D 0A 1A 0A)
+        if (
+          file.type === "image/png" &&
+          (view[0] !== 0x89 ||
+            view[1] !== 0x50 ||
+            view[2] !== 0x4e ||
+            view[3] !== 0x47 ||
+            view[4] !== 0x0d ||
+            view[5] !== 0x0a ||
+            view[6] !== 0x1a ||
+            view[7] !== 0x0a)
+        ) {
+          reject(new Error("無効なPNG画像形式です"));
+          return;
+        }
+
+        resolve(true);
+      };
+
+      reader.onerror = function () {
+        reject(new Error("ファイルの読み込み中にエラーが発生しました"));
+      };
+
+      // ファイルの先頭の8バイトだけを読み込む
+      reader.readAsArrayBuffer(file.slice(0, 8));
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        // 型安全にフィールド値を設定
-        form.setValue(imageUrlField, "pending-upload" as PathValue<T, Path<T>>);
-        form.setValue(
-          imagePathField,
-          "pending-upload" as PathValue<T, Path<T>>
-        );
+      try {
+        // 画像フォーマットの検証
+        await validateImageFile(file);
 
-        // エラーメッセージがあれば消去
-        form.clearErrors(imageUrlField);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+          // 型安全にフィールド値を設定
+          form.setValue(
+            imageUrlField,
+            "pending-upload" as PathValue<T, Path<T>>
+          );
+          form.setValue(
+            imagePathField,
+            "pending-upload" as PathValue<T, Path<T>>
+          );
 
-        // 親コンポーネントにファイルを通知
-        onImageFileChange(file);
-      };
-      reader.readAsDataURL(file);
+          // エラーメッセージがあれば消去
+          form.clearErrors(imageUrlField);
+
+          // 親コンポーネントにファイルを通知
+          onImageFileChange(file);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        // 検証エラーの処理
+        console.error("画像検証エラー:", error);
+        toast({
+          title: "画像エラー",
+          description:
+            error instanceof Error ? error.message : "無効な画像形式です",
+          variant: "destructive",
+        });
+
+        // ファイル入力をリセット
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
     }
   };
 
