@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 
 import { deleteProduct } from "@/services/products-service";
 import { Product } from "@/models/product";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 // 商品削除ダイアログのプロパティ型定義
 type Props = {
@@ -26,6 +27,7 @@ type Props = {
 };
 
 export function DeleteProductDialog({ categoryId, product }: Props) {
+  const { token } = useAuthToken();
   // 削除中の状態管理
   const [isDeleting, setIsDeleting] = React.useState(false);
   // エラーメッセージの状態管理
@@ -38,7 +40,7 @@ export function DeleteProductDialog({ categoryId, product }: Props) {
       setIsDeleting(true); // 削除中状態を設定
       setError(null); // エラーをリセット
       // サーバーサイドで画像も含めた削除処理を実行
-      await deleteProduct(product.id, categoryId, product.imagePath);
+      await deleteProduct(token, product.id, categoryId, product.imagePath);
       success = true; // エラーが発生しなかった場合のみtrueに設定
     } catch (err) {
       console.error("商品の削除に失敗しました:", err);
