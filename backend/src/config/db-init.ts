@@ -88,7 +88,7 @@ export const initializeTables = async (): Promise<void> => {
   CREATE TABLE IF NOT EXISTS orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255),
     pickup_id VARCHAR(255) NOT NULL,
     items JSONB NOT NULL,
     product_ids TEXT[] NOT NULL,

@@ -1,4 +1,3 @@
-import { useAuthToken } from "@/auth/hooks/use-auth-token";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 // トークン付きでのリクエスト
