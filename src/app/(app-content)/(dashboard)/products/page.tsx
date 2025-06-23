@@ -48,7 +48,7 @@ export default function ProductsPage() {
   // プレビューURLを生成する関数
   //TODO awsに移行後にUrlを修正する
   const getPreviewUrl = () => {
-    return `https://mobile-order-app-seven.vercel.app/?ownerId=${userId}&mode=device`;
+    return `https://app.mobile-order-manager.com/?ownerId=${userId}&mode=device`;
   };
 
   // プレビューボタンをクリックした時の処理
