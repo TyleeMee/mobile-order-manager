@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import ContinueWithGoogleButton from "@/components/continue-with-google-button";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,10 +14,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/auth/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { getFirebaseErrorInfo } from "@/lib/error-messages/firebase-client-errors";
 import { loginUserSchema } from "@/validation/auth-user-schema";
+import { getCognitoErrorMessage } from "@/lib/error-messages/cognito-errors";
 
 export default function LoginForm() {
   const { toast } = useToast();
@@ -36,14 +35,27 @@ export default function LoginForm() {
   const handleSubmit = async (data: z.infer<typeof loginUserSchema>) => {
     try {
       await auth?.loginWithEmail(data.email, data.password);
-      router.refresh();
-    } catch (error: unknown) {
-      // エラーから日本語メッセージを取得
-      const errorInfo = getFirebaseErrorInfo(error);
+      //   router.refresh();
+    } catch (error: any) {
+      console.error("ログイン処理中にエラーが発生しました:", error);
+
+      // エラーメッセージを適切に処理
+      let errorMessage = "ログインに失敗しました。";
+
+      if (error.code) {
+        errorMessage = getCognitoErrorMessage(error.code);
+      } else if (error.message) {
+        if (error.message.includes("Incorrect username or password")) {
+          errorMessage = "メールアドレスまたはパスワードが間違っています";
+        } else if (error.message.includes("User is not confirmed")) {
+          errorMessage =
+            "メールアドレスが確認されていません。確認メールをご確認ください";
+        }
+      }
 
       toast({
         title: "ログインエラー",
-        description: errorInfo.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -89,10 +101,8 @@ export default function LoginForm() {
             }}
           />
           <Button type="submit">ログイン</Button>
-          <div className="text-center pb-5">or</div>
         </fieldset>
       </form>
-      <ContinueWithGoogleButton />
     </Form>
   );
 }

@@ -1,17 +1,10 @@
+const path = require("path"); // ← 追加
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "firebasestorage.googleapis.com", // Firebase Storage の画像
-      },
-      {
-        protocol: "https",
-        hostname: "storage.googleapis.com",
-      },
-    ],
+    domains: ["mobile-order-s3-bucket.s3.ap-northeast-1.amazonaws.com"],
   },
   // 型チェックとESLintをスキップする設定
   typescript: {
@@ -19,6 +12,13 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  output: "standalone",
+
+  // ここから追加：webpackのエイリアス設定
+  webpack: (config) => {
+    config.resolve.alias["@"] = path.resolve(__dirname, "src");
+    return config;
   },
 };
 

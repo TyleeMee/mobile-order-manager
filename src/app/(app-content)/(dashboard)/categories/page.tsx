@@ -1,6 +1,6 @@
 import React from "react";
 
-import CategoriesList from "./(presentation)/categories-list";
+import CategoriesList from "./categories-list";
 
 export default function CategoriesPage() {
   return (

@@ -1,10 +1,17 @@
 import { z } from "zod";
 
-export const shopSchema = z.object({
-  title: z.string().min(1, "入力してください"),
-  imageUrl: z.string().min(1, "画像をアップロードしてください"),
-  imagePath: z.string().min(1, "画像をアップロードしてください"),
-  description: z.string().optional(),
+export const shopObjectSchema = z.object({
+  title: z
+    .string()
+    .min(1, "入力してください")
+    .max(255, "255文字以内で入力してください"),
+  // バックエンドでの画像処理に対応するための変更
+  imageUrl: z.string().optional().or(z.literal("")),
+  imagePath: z.string().optional().or(z.literal("")),
+  description: z
+    .string()
+    .max(1000, "説明は1000文字以内で入力してください")
+    .optional(),
   prefecture: z.enum([
     "北海道",
     "青森県",
@@ -54,9 +61,33 @@ export const shopSchema = z.object({
     "鹿児島県",
     "沖縄県",
   ]),
-  city: z.string().min(1, "入力してください"),
-  streetAddress: z.string().min(1, "入力してください"),
-  building: z.string().optional(),
+  city: z
+    .string()
+    .min(1, "入力してください")
+    .max(100, "市区町村は100文字以内で入力してください"),
+  streetAddress: z
+    .string()
+    .min(1, "入力してください")
+    .max(200, "番地は200文字以内で入力してください"),
+  building: z
+    .string()
+    .max(200, "建物名は200文字以内で入力してください")
+    .optional(),
   isVisible: z.boolean().default(false),
   isOrderAccepting: z.boolean().default(false),
+  _hasImageFile: z.boolean().optional(),
 });
+
+// バリデーションルールを追加したスキーマ
+export const shopSchema = shopObjectSchema.refine(
+  (data) => {
+    if (data.imageUrl || data.imagePath) {
+      return true;
+    }
+    return data._hasImageFile === true;
+  },
+  {
+    message: "画像をアップロードしてください",
+    path: ["imageUrl"],
+  }
+);

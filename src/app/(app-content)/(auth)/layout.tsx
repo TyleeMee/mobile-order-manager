@@ -1,6 +1,6 @@
 import React from "react";
 
-import { AuthRoute } from "@/components/auth/auth-route";
+import { AuthRoute } from "@/auth/components/auth-route";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

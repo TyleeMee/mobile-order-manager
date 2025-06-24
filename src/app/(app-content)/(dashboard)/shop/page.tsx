@@ -5,13 +5,13 @@ import React, { useEffect, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthenticatedUser } from "@/hooks/use-authenticated-user";
 import { useToast } from "@/hooks/use-toast";
 
-import { getShop } from "./(application)/shop-service";
-import { Shop } from "./(domain)/shop";
-import CreateShopForm from "./(presentation)/create/create-shop-form";
-import EditShopForm from "./(presentation)/edit/edit-shop-form";
+import { Shop } from "@/models/shop";
+import { getShop } from "@/services/shop-service";
+import EditShopForm from "./edit/edit-shop-form";
+import CreateShopForm from "./create/create-shop-form";
+import { useAuthToken } from "@/auth/hooks/use-auth-token";
 
 // 店舗データの状態を表す型
 type ShopState = {
@@ -21,18 +21,32 @@ type ShopState = {
 };
 
 export default function ShopPage() {
+  const { token } = useAuthToken();
   const { toast } = useToast();
-  const user = useAuthenticatedUser();
   const [shopState, setShopState] = useState<ShopState>({
     status: "loading",
     data: null,
+  });
+
+  // ShopPage初期化時のデバッグ情報
+  console.log("ShopPage レンダリング:", {
+    トークン: token ? "取得済み" : "未取得",
   });
 
   // useEffectを使用してデータを取得
   useEffect(() => {
     const loadShop = async () => {
       try {
-        const shopData = await getShop(user.uid);
+        // トークンがない場合は何もしない
+        if (!token) {
+          console.log(
+            "トークンがまだ準備できていないため、データ取得を待機します"
+          );
+          return;
+        }
+
+        console.log("認証トークン:", token);
+        const shopData = await getShop(token);
 
         if (shopData) {
           // データが存在する場合
@@ -64,7 +78,7 @@ export default function ShopPage() {
     };
 
     loadShop();
-  }, [user, toast]);
+  }, [token, toast]);
 
   // ローディング中の表示
   if (shopState.status === "loading") {

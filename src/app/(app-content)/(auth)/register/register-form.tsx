@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import ContinueWithGoogleButton from "@/components/continue-with-google-button";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,12 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/auth/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { getFirebaseErrorInfo } from "@/lib/error-messages/firebase-client-errors";
 import { registerUserSchema } from "@/validation/auth-user-schema";
 
-import { createFirebaseUser } from "../(application)/auth-service";
+import { createCognitoUser } from "@/auth/services/auth-service";
 
 export default function RegisterForm() {
   const auth = useAuth();
@@ -31,41 +29,60 @@ export default function RegisterForm() {
   const form = useForm<z.infer<typeof registerUserSchema>>({
     resolver: zodResolver(registerUserSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       passwordConfirm: "",
-      name: "",
     },
   });
 
   const handleSubmit = async (data: z.infer<typeof registerUserSchema>) => {
-    const response = await createFirebaseUser(data);
+    try {
+      console.log("送信データ:", data); // 送信データを確認
+      const response = await createCognitoUser(data);
+      console.log("レスポンス:", response); // 完全なレスポンスを確認
 
-    if (!!response?.error) {
+      if (!!response?.error) {
+        toast({
+          title: "エラー",
+          description: response.message ?? "アカウントの新規作成に失敗しました",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      //   toast({
+      // title: "アカウントを新規作成しました",
+      //   description: "Your account was created successfully!",
+      //     variant: "success",
+      //   });
+
+      // 登録成功後、自動的にログインする
+      try {
+        await auth?.loginWithEmail(data.email, data.password);
+
+        // ログイン成功後、products ページに遷移
+        // router.push("/products");
+      } catch (loginError) {
+        console.error("自動ログイン中にエラーが発生しました:", loginError);
+        toast({
+          title: "ログインエラー",
+          description:
+            "アカウントは作成されましたが、自動ログインに失敗しました。ログインページからログインしてください。",
+          variant: "destructive",
+        });
+
+        // ログイン失敗時はログインページへ遷移
+        router.push("/login");
+      }
+    } catch (error: unknown) {
+      console.error("登録処理中にエラーが発生しました:", error);
       toast({
         title: "エラー",
-        description: response.message ?? "アカウントの新規作成に失敗しました",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "アカウントを新規作成しました",
-      //   description: "Your account was created successfully!",
-      variant: "success",
-    });
-
-    try {
-      await auth?.loginWithEmail(data.email, data.password);
-      router.refresh();
-    } catch (error: unknown) {
-      // エラーから日本語メッセージを取得
-      const errorInfo = getFirebaseErrorInfo(error);
-
-      toast({
-        title: "ログインエラー",
-        description: errorInfo.message,
+        description:
+          error instanceof Error
+            ? error.message
+            : "アカウント作成中にエラーが発生しました。",
         variant: "destructive",
       });
     }
@@ -147,10 +164,8 @@ export default function RegisterForm() {
             }}
           />
           <Button type="submit">新規作成する</Button>
-          <div className="text-center pb-6">or</div>
         </fieldset>
       </form>
-      <ContinueWithGoogleButton />
     </Form>
   );
 }
